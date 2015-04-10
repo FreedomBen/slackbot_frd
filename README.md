@@ -59,24 +59,16 @@ Stop them later (if in daemonize mode):
 
     slackbot-frd stop
 
-## The Easy Case
-
-TODO: one ruby file that requires slackbot_frd and then works
-
-## The More Complicated (and therefore more powerful) Case
-
-Subclass the bot class, and do your magic there:
-
 ## Configuration options
 
 The following configuration options are available.  Where applicable, defaults are noted:
 
-Option | Config File Var Name | Environment Var | Command Line Flag | Default val | Description
----------------------------------------------------------------------------------
-Slack API token | "token" | SLACKBOT_FRD_TOKEN | -t or --token | None | The API token for use with slack.  This is required.
-Top level of bot directory | "botdir" | SLACKBOT_FRD_BOTDIR | -b or --botdir | current working dir | This is the top level of the bot directory.  This directory and it's subs will be loaded in to the ruby environment
-Daemonize | "daemonize" | SLACKBOT_FRD_DAEMONIZE | -d or --daemonize | false | if true, the connection watcher will be run as a daemon process
-Bots to run | "bots" | No env var | specified as extra args with no flags | all | These are the bots that will be run by the framework
+Option                     | Config File Var Name | Environment Var        | Command Line Flag                     | Default val         | Description
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Slack API token            | "token"              | SLACKBOT_FRD_TOKEN     | -t or --token                         | None                | The API token for use with slack.  This is required.
+Top level of bot directory | "botdir"             | SLACKBOT_FRD_BOTDIR    | -b or --botdir                        | current working dir | This is the top level of the bot directory.  This directory and it's subs will be loaded in to the ruby environment
+Daemonize                  | "daemonize"          | SLACKBOT_FRD_DAEMONIZE | -d or --daemonize                     | false               | if true, the connection watcher will be run as a daemon process
+Bots to run                | "bots"               | No env var             | specified as extra args with no flags | all                 | These are the bots that will be run by the framework
 
 ## Subclassing SlackbotFrd::Bot
 
@@ -124,7 +116,13 @@ If you are going ultra simple and just want to make api calls without establishi
     # and don't care about loading more than you need
     require 'slackbot_frd/lib/slack_methods/chat_post_message'
 
-    ChatPostMessage.postMessage('<dis-be-my-token-sucka>', '#fun_room', 'Oh, ah, ah, ah, ah', 'Down With The Sickness Bot', ':devil:')
+    ChatPostMessage.postMessage(
+        '<dis-be-my-token-sucka>',
+        '#fun_room',
+        'Oh, ah, ah, ah, ah',
+        'Down With The Sickness Bot',
+        ':devil:'
+    )
 
 This simple method can give you a lot of power.  For instance, I use this at work to post reminders for daily standups.  I just call the script from a [cron](http://en.wikipedia.org/wiki/Cron) job.
 
