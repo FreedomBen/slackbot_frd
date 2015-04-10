@@ -52,13 +52,13 @@ Install this gem:
 
 ### Step 4
 
-Sublass SlackbotFrd::Bot and do something cool.  Here's the entire implementation for an annoying bot that just echoes what you say (More [details below](#subclassing-slackbotfrd::bot)):
+Subclass `SlackbotFrd::Bot` and do something cool.  Here's the entire implementation for an annoying bot that just echoes what you say (More [details below](#subclassing-slackbotfrd::bot)):
 
     require 'slackbot_frd'
 
     class EchoBot < SlackbotFrd::Bot
       def add_callbacks(slack_connection)
-        slack_connection.on_message(:any, :any) do |user, channel, message|
+        slack_connection.on_message do |user, channel, message|
           slack_connection.send_message_as_user(channel, message) if user != :bot
         end
       end
@@ -123,7 +123,7 @@ The following configuration options are available.  Where applicable, defaults a
 
 ## Subclassing SlackbotFrd::Bot
 
-In your subclass of SlackbotFrd::Bot, you will need to override the `add_callbacks` method which takes one argument, commonly call `slack_connection` (or `sc` for short).
+In your subclass of `SlackbotFrd::Bot`, you will need to override the `add_callbacks` method which takes one argument, commonly call `slack_connection` (or `sc` for short).
 
     def add_callbacks(slack_connection)
 
@@ -182,15 +182,31 @@ This simple method can give you a lot of power.  For instance, I use this at wor
 
 ### Posting as a bot using your regular user token
 
-You can post a chat message that appears to come from a "bot," using only your user's API token!  Don't be stupid tho, if you do something irresponsible it can easily be tracked back to you.
+You can post a chat message that appears to come from a "bot," using only your user's API token!  Don't be stupid though.  If you do something irresponsible it can easily be tracked back to you.
 
 * From inside a "slack_connection" (such as the one passed to your `SlackbotFrd::Bot` subclass):
 
-    slack_connection.send_message(channel, message, username_to_show, avatar_emoji_or_url, true_if_avatar_is_emoji)
+    ```
+    slack_connection.send_message(
+        channel,
+        message,
+        username_to_show,
+        avatar_emoji_or_url,
+        true_if_avatar_is_emoji
+    )
+    ```
 
 * Directly using `ChatPostMessage`:
 
-    ChatPostMessage.postMessage(channel, message, username_to_show, avatar_emoji_or_url, true_if_avatar_is_emoji)
+    ```
+    ChatPostMessage.postMessage(
+        channel,
+        message,
+        username_to_show,
+        avatar_emoji_or_url,
+        true_if_avatar_is_emoji
+    )
+    ```
 
 ## How do I set up incoming webhooks with this?
 
