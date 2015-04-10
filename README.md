@@ -23,15 +23,18 @@ You have 3 options for configuring slackbot_frd.  In the event that you do more 
     * Is parsed as JSON.
     * All portions are optional except token (unless token is specified elsewhere)
     * If JSON doesn't contain "bots" then all bots will be run
-    * Example: `{
-        "token" : "<your-token>",
-        "botdir" : ".",
-        "daemonize" : false,
-        "bots" : [
-            "EchoBot",
-            "GreetingBot"
-        ]
-    }`
+    * Example: 
+
+        {
+            "token" : "<your-token>",
+            "botdir" : ".",
+            "daemonize" : false,
+            "bots" : [
+                "EchoBot",
+                "GreetingBot"
+            ]
+        }
+
 2. Environment variables
     * `SLACKBOT_FRD_TOKEN="<your-token>"`
     * `SLACKBOT_FRD_BOTDIR="/directory/containing/bots"`
