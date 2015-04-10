@@ -16,7 +16,7 @@ Go [here](https://my.slack.com/services/new/bot) and do the dance to make a bot 
 
 ### Step 2
 
-You have 3 options for configuring slackbot_frd.  In the event that you do more than one of these, the *latter* one will trump (IOTW, if you have a config file and environment variables, the env variables win (see [below](#configuration-options) for enumeration of config options):
+You have 3 options for configuring slackbot_frd.  In the event that you do more than one of these, the *latter* one will trump (In other words, if you have a config file *and* environment variables set, the environment variables will win out (see [below](#configuration-options) for an enumeration of config options):
 
 1. A config file called  'slackbot-frd.conf' in your top level directory
     * Can also be specified on the command line by with --config-file
@@ -52,7 +52,7 @@ Install this gem:
 
 ### Step 4
 
-Subclass `SlackbotFrd::Bot` and do something cool.  Here's the entire implementation for an annoying bot that just echoes what you say (More [details below](#subclassing-slackbotfrd::bot)):
+Subclass `SlackbotFrd::Bot` and do something cool.  Here's the entire implementation for an annoying bot that just echoes what you say (More [details below](#subclassing-bot)):
 
     require 'slackbot_frd'
 
@@ -121,7 +121,7 @@ The following configuration options are available.  Where applicable, defaults a
     </tr>
 </table>
 
-## Subclassing SlackbotFrd::Bot
+## Subclassing Bot
 
 In your subclass of `SlackbotFrd::Bot`, you will need to override the `add_callbacks` method which takes one argument, commonly call `slack_connection` (or `sc` for short).
 
