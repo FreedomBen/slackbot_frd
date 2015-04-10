@@ -1,0 +1,196 @@
+#!/usr/bin/env ruby
+
+require 'thor'
+require 'json'
+
+require 'slackbot_frd/initializer/bot_starter'
+require 'slackbot_frd/lib/slack_connection'
+require 'slackbot_frd/lib/bot'
+
+begin
+  require 'byebug'
+rescue LoadError
+end
+
+DEBUG = true
+
+PID_FILE_WATCHER = "/tmp/slackbot-frd-watcher.pid"
+PID_FILE_CONNECTION = "/tmp/slackbot-frd-connection.pid"
+BOT_LIST_FILE = "/tmp/slackbot-frd-bot-list.pid"
+ERROR_FILE = "/tmp/slackbot-frd-error-file.pid"
+DEFAULT_CONFIG_FILE = "slackbot-frd.conf"
+LOG_FILE = "slackbot-frd.log"
+
+class SlackbotFrdBin < Thor
+  desc "list", "List all bots"
+  long_desc <<-LONGDESC
+    list will print out all available bots
+
+    > $ slackbot-frd list -- List all installed bots
+  LONGDESC
+  def list
+    # TODO
+  end
+
+  desc "start [bot1] [bot2] [botx...]", "Start all specified bots, or all bots"
+  long_desc <<-LONGDESC
+    start [bot1] [bot2] [botx...] will start the specified bots.
+    If no bots are specified, all available bots will be run.
+
+    params set via explicit flags will overwrite conflicting environment variables,
+    and environment variables will overwrite conflicting config file params.
+
+    > $ slackbot-frd start -- Start all available bots
+  LONGDESC
+  option :daemonize, type: :boolean, aliases: 'd'
+  option :botdir, type: :string, aliases: 'b'
+  option 'config-file'.to_sym, type: :string, aliases: 'c'
+  option :token, type: :string, aliases: 't'
+  def start(*bots)
+    config_file = options['config-file'.to_sym]
+    config_file = "#{Dir.pwd}/#{DEFAULT_CONFIG_FILE}" unless config_file
+    json = config_file_json(config_file) if config_file
+    json ||= {}
+
+    daemonize = false
+    daemonize = json["daemonize"] if json["daemonize"]
+    daemonize = ENV["SLACKBOT_FRD_DAEMONIZE"] if ENV["SLACKBOT_FRD_DAEMONIZE"]
+    daemonize = options[:daemonize] if options[:daemonize]
+
+    botdir = Dir.pwd
+    botdir = json["botdir"] if json["botdir"]
+    botdir = ENV["SLACKBOT_FRD_BOTDIR"] if ENV["SLACKBOT_FRD_BOTDIR"]
+    botdir = options[:botdir] if options[:botdir]
+    botdir = File.expand_path(botdir)
+
+    SlackbotFrd::Log.logfile = "#{botdir}/#{LOG_FILE}"
+    SlackbotFrd::Log.info("Logging to file '#{SlackbotFrd::Log.logfile}'")
+
+    token = json["token"]
+    token = ENV["SLACKBOT_FRD_TOKEN"] if ENV["SLACKBOT_FRD_TOKEN"]
+    token = options[:token] if options[:token]
+    unless token
+      SlackbotFrd::Log.error("No token found.  Cannot authenticate to Slack")
+      return
+    end
+
+    if daemonize
+      set_watcher_pid(Process.fork{ watch_connection(bots, token, botdir, true) })
+    else
+      watch_connection(bots, token, botdir)
+    end
+  end
+
+  desc "stop", "Stop all bots"
+  long_desc <<-LONGDESC
+    stop will stop all bots
+
+    > $ slackbot-frd stop -- Stop all running bots
+  LONGDESC
+
+  def stop
+    # first kill the watcher, then kill the connection
+    kill_pid(watcher_pid)
+    kill_pid(connection_pid)
+  end
+
+  desc "restart", "Stop all bots and restart them"
+  long_desc <<-LONGDESC
+    restart will restart all bots
+
+    > $ slackbot-frd restart -- Restart all running bots
+  LONGDESC
+  def restart
+    stop
+    start(set_bots)
+  end
+
+  private
+  def config_file_json(config_file)
+    if File.exists?(config_file)
+      content = File.read(config_file)
+      return JSON.parse(content)
+    end
+    nil
+  end
+
+  private
+  def bots_from_file
+    File.read(BOT_LIST_FILE).split
+  end
+
+  private
+  def set_bots_in_file(bots)
+    File.write(BOT_LIST_FILE, "#{bots.join("\n")}")
+  end
+
+  private
+  def kill_pid(pid)
+    # try 3 times to SIGINT the pid, then SIGKILL it
+    3.times do
+      break unless running?(pid)
+      Process.kill('SIGINT', pid)
+    end
+    Process.kill('SIGKILL', pid) if running?(pid)
+    # TODO log if the process is still running
+  end
+
+  private
+  def watch_connection(bots, token, botdir, daemonize = false)
+    until errors
+      pid = Process.fork do
+        Process.daemon if daemonize
+        loop { BotStarter.start_bots(ERROR_FILE, token, botdir, bots) }
+      end
+      set_connection_pid(pid)
+      Process.wait(pid)
+    end
+    if errors
+      puts "Could not start connection: #{errors}"
+    end
+  end
+
+  private
+  def errors
+    return File.read(ERROR_FILE).split if File.exists?(ERROR_FILE)
+    nil
+  end
+
+  private
+  def running?(pid)
+    begin
+      Process.getpgid(pid.to_i)
+      return true
+    rescue Errno::ESRCH
+      return false
+    end
+  end
+
+  private
+  def watcher_pid
+    File.read(PID_FILE_WATCHER).to_i
+  end
+
+  private
+  def connection_pid
+    File.read(PID_FILE_CONNECTION).to_i
+  end
+
+  private
+  def set_watcher_pid(pid)
+    File.write(PID_FILE_WATCHER, pid)
+  end
+
+  private
+  def set_connection_pid(pid)
+    File.write(PID_FILE_CONNECTION, pid)
+  end
+
+  private
+  def delete_pid_files
+    File.delete(PID_FILE_WATCHER)
+    File.delete(PID_FILE_CONNECTION)
+  end
+end
+
+SlackbotFrdBin.start(ARGV)
