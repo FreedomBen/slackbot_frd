@@ -8,9 +8,9 @@ The slack web api is good, but very raw.  What you need is a great ruby framewor
 
 ### Step 1
 
-First, get a slack API token.  You can do this as your regular user, or (if you have admin powers) you can create a bot user.  
+First, get a slack API token.  You can do this as your regular user, or (if you have admin powers) you can create a bot user.
 
-To get a token as your regular user, go to [https://api.slack.com/web](https://api.slack.com/web), scroll down to "Authentication," then issue yourself a token.  
+To get a token as your regular user, go to [https://api.slack.com/web](https://api.slack.com/web), scroll down to "Authentication," then issue yourself a token.
 
 Go [here](https://my.slack.com/services/new/bot) and do the dance to make a bot user.  Copy the bot user's token for later.
 
@@ -21,13 +21,24 @@ You have 3 options for configuring slackbot_frd.  In the event that you do more 
 1. A config file called  'slackbot-frd.conf' in your top level directory
     * Can also be specified on the command line by with --config-file
     * Is parsed as JSON.
-    * Example: { "token" : "<your-token>", "botdir" : ".", "daemonize" : false }
+    * All portions are optional except token (unless token is specified elsewhere)
+    * If JSON doesn't contain "bots" then all bots will be run
+    * Example:
+    {
+        "token" : "<your-token>",
+        "botdir" : ".",
+        "daemonize" : false,
+        "bots" : [
+            "EchoBot",
+            "GreetingBot"
+        ]
+    }
 2. Environment variables
-    * SLACKBOT_FRD_TOKEN="<your-token>"
-    * SLACKBOT_FRD_BOTDIR="/directory/containing/bots"
-    * SLACKBOT_FRD_DAEMONIZE="y"  # Any non-null value works here
+    * `SLACKBOT_FRD_TOKEN="<your-token>"`
+    * `SLACKBOT_FRD_BOTDIR="/directory/containing/bots"`
+    * `SLACKBOT_FRD_DAEMONIZE="y"  # Any non-null value works here`
 3. Command line arguments
-    * slackbot-frd start --daemonize --token "<your-token>" --botdir "."
+    * `slackbot-frd start --daemonize --token "<your-token>" --botdir "."`
 
 ### Step 3
 
@@ -62,13 +73,6 @@ Stop them later (if in daemonize mode):
 ## Configuration options
 
 The following configuration options are available.  Where applicable, defaults are noted:
-
-Option                     | Config File Var Name | Environment Var        | Command Line Flag                     | Default val         | Description
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Slack API token            | "token"              | SLACKBOT_FRD_TOKEN     | -t or --token                         | None                | The API token for use with slack.  This is required.
-Top level of bot directory | "botdir"             | SLACKBOT_FRD_BOTDIR    | -b or --botdir                        | current working dir | This is the top level of the bot directory.  This directory and it's subs will be loaded in to the ruby environment
-Daemonize                  | "daemonize"          | SLACKBOT_FRD_DAEMONIZE | -d or --daemonize                     | false               | if true, the connection watcher will be run as a daemon process
-Bots to run                | "bots"               | No env var             | specified as extra args with no flags | all                 | These are the bots that will be run by the framework
 
 <table>
     <tr>
