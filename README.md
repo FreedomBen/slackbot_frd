@@ -25,6 +25,7 @@ You have 3 options for configuring slackbot_frd.  In the event that you do more 
     * If JSON doesn't contain "bots" then all bots will be run
     * Example: 
 
+        ```
         {
             "token" : "<your-token>",
             "botdir" : ".",
@@ -34,6 +35,7 @@ You have 3 options for configuring slackbot_frd.  In the event that you do more 
                 "GreetingBot"
             ]
         }
+        ```
 
 2. Environment variables
     * `SLACKBOT_FRD_TOKEN="<your-token>"`
