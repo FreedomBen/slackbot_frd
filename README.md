@@ -70,6 +70,49 @@ Top level of bot directory | "botdir"             | SLACKBOT_FRD_BOTDIR    | -b 
 Daemonize                  | "daemonize"          | SLACKBOT_FRD_DAEMONIZE | -d or --daemonize                     | false               | if true, the connection watcher will be run as a daemon process
 Bots to run                | "bots"               | No env var             | specified as extra args with no flags | all                 | These are the bots that will be run by the framework
 
+<table>
+    <tr>
+        <td>Option</td>
+        <td>Config File Var Name</td>
+        <td>Environment Var</td>
+        <td>Command Line Flag</td>
+        <td>Default val</td>
+        <td>Description</td>
+    </tr>
+    <tr>
+        <td>Slack API token</td>
+        <td>"token"</td>
+        <td>SLACKBOT_FRD_TOKEN</td>
+        <td>-t or --token</td>
+        <td>None</td>
+        <td>The API token for use with slack.  This is required.</td>
+    </tr>
+    <tr>
+        <td>Top level of bot directory</td>
+        <td>"botdir"</td>
+        <td>SLACKBOT_FRD_BOTDIR</td>
+        <td>-b or --botdir</td>
+        <td>current working dir</td>
+        <td>This is the top level of the bot directory.  This directory and it's subs will be loaded in to the ruby environment</td>
+    </tr>
+    <tr>
+        <td>Daemonize</td>
+        <td>"daemonize"</td>
+        <td>SLACKBOT_FRD_DAEMONIZE</td>
+        <td>-d or --daemonize</td>
+        <td>false</td>
+        <td>if true, the connection watcher will be run as a daemon process</td>
+    </tr>
+    <tr>
+        <td>Bots to run</td>
+        <td>"bots"</td>
+        <td>No env var</td>
+        <td>specified as extra args with no flags</td>
+        <td>all</td>
+        <td>These are the bots that will be run by the framework</td>
+    </tr>
+</table>
+
 ## Subclassing SlackbotFrd::Bot
 
 In your subclass of SlackbotFrd::Bot, you will need to override the `add_callbacks` method which takes one argument, commonly call `slack_connection` (or `sc` for short).
