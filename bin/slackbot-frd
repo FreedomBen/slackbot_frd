@@ -108,7 +108,7 @@ class SlackbotFrdBin < Thor
     end
 
     if daemonize
-      set_watcher_pid(Process.fork{ watch_connection(bots, token, botdir, true) })
+      Process.fork{ watch_connection(bots, token, botdir, true) }
     else
       watch_connection(bots, token, botdir)
     end
@@ -178,6 +178,7 @@ class SlackbotFrdBin < Thor
   private
   def watch_connection(bots, token, botdir, daemonize = false)
     Process.daemon if daemonize
+    set_watcher_pid(Process.pid)
     until errors
       pid = Process.fork { BotStarter.start_bots(ERROR_FILE, token, botdir, bots) }
       set_connection_pid(pid)
@@ -214,13 +215,13 @@ class SlackbotFrdBin < Thor
 
   private
   def watcher_pid
-    File.read(PID_FILE_WATCHER).to_i if File.exists?(PID_FILE_WATCHER)
+    return File.read(PID_FILE_WATCHER).to_i if File.exists?(PID_FILE_WATCHER)
     nil
   end
 
   private
   def connection_pid
-    File.read(PID_FILE_CONNECTION).to_i if File.exists?(PID_FILE_CONNECTION)
+    return File.read(PID_FILE_CONNECTION).to_i if File.exists?(PID_FILE_CONNECTION)
     nil
   end
 
