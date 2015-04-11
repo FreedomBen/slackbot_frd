@@ -32,6 +32,15 @@ class SlackbotFrdBin < Thor
     # TODO
   end
 
+  desc "status", "Report status on daemon procs"
+  def status
+    if running?(watcher_pid)
+      puts "Daemon running as pid '#{watcher_pid}'".green
+    else
+      puts "Daemon not running".red
+    end
+  end
+
   desc "genconfig", "Generate a skeleton config file"
   long_desc <<-LONGDESC
     genconfig will generate a skeleton config file that
