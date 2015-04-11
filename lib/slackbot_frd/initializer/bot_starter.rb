@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'file-append'
 require 'thor'
 
 require 'slackbot_frd/lib/slack_connection'
@@ -32,9 +33,8 @@ class BotStarter
     end
 
     if bots.count == 0
-      @error ||= []
-      @error.push("No bots loaded")
       SlackbotFrd::Log.error("Not starting: no bots found")
+      File.append(errors_file, "Not starting: no bots found")
     else
       SlackbotFrd::Log.debug("Starting SlackConnection")
       slack_connection.start
