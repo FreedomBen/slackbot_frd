@@ -32,6 +32,22 @@ class SlackbotFrdBin < Thor
     # TODO
   end
 
+  desc "genconfig", "Generate a skeleton config file"
+  long_desc <<-LONGDESC
+    genconfig will generate a skeleton config file that
+    can be customized
+  LONGDESC
+  def genconfig
+    File.write(config_file_location, <<-CONFIG_FILE_SKELETON)
+      {
+          "token" : "<put-token-here>",
+          "botdir" : ".",
+          "daemonize" : false,
+          "bots" : []
+      }
+    CONFIG_FILE_SKELETON
+  end
+
   desc "start [bot1] [bot2] [botx...]", "Start all specified bots, or all bots"
   long_desc <<-LONGDESC
     start [bot1] [bot2] [botx...] will start the specified bots.
