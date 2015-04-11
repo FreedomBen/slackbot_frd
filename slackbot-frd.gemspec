@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'thor', '~> 0.19'
   s.add_runtime_dependency 'daemons', '~> 1.2'
   s.add_runtime_dependency 'json', '~> 1.8'
+  s.add_runtime_dependency 'file-append', '~> 0.0'
 
   s.add_development_dependency "byebug", '~> 4.0'
   s.add_development_dependency "rspec", "~> 3.1"

@@ -1,5 +1,6 @@
 require 'faye/websocket'
 require 'eventmachine'
+require 'file-append'
 require 'json'
 
 require 'slackbot_frd/lib/errors'
@@ -22,13 +23,14 @@ module SlackbotFrd
 
     attr_accessor :token
 
-    def initialize(token)
+    def initialize(token, errors_file)
       unless token
         SlackbotFrd::Log::error("No token passed to #{self.class}")
         raise NoTokenError.new
       end
 
       @token = token
+      @errors_file = errors_file
       @event_id = 0
       @on_connected_callbacks = []
       @on_disconnected_callbacks = []
@@ -57,7 +59,7 @@ module SlackbotFrd
         unless wss_url
           str = "No Real Time stream opened by slack.  Check for correct authentication token"
           SlackbotFrd::Log.error(str)
-          File.append(@errors_file, str)
+          File.append(@errors_file, "#{str}\n") if @errors_file
           return
         end
         @ws = Faye::WebSocket::Client.new(wss_url)

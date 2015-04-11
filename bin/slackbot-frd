@@ -17,7 +17,7 @@ DEBUG = true
 PID_FILE_WATCHER = "/tmp/slackbot-frd-watcher.pid"
 PID_FILE_CONNECTION = "/tmp/slackbot-frd-connection.pid"
 BOT_LIST_FILE = "/tmp/slackbot-frd-bot-list.pid"
-ERROR_FILE = "/tmp/slackbot-frd-error-file.pid"
+ERROR_FILE = "/tmp/slackbot-frd.errors"
 DEFAULT_CONFIG_FILE = "slackbot-frd.conf"
 LOG_FILE = "slackbot-frd.log"
 
@@ -63,8 +63,16 @@ class SlackbotFrdBin < Thor
   option 'config-file'.to_sym, type: :string, aliases: 'c'
   option :token, type: :string, aliases: 't'
   def start(*bots)
+    if running?(watcher_pid)
+      SlackbotFrd::Log.warn("Already running.  Not starting again")
+      return
+    end
+
+    delete_pid_files
+    delfile(ERROR_FILE)
+
     config_file = options['config-file'.to_sym]
-    config_file = "#{Dir.pwd}/#{DEFAULT_CONFIG_FILE}" unless config_file
+    config_file = config_file_location unless config_file
     json = config_file_json(config_file) if config_file
     json ||= {}
 
@@ -108,6 +116,9 @@ class SlackbotFrdBin < Thor
     # first kill the watcher, then kill the connection
     kill_pid(watcher_pid)
     kill_pid(connection_pid)
+
+    delete_pid_files
+    delfile(ERROR_FILE)
   end
 
   desc "restart", "Stop all bots and restart them"
@@ -119,6 +130,10 @@ class SlackbotFrdBin < Thor
   def restart
     stop
     start(set_bots)
+  end
+  private
+  def config_file_location
+    "#{Dir.pwd}/#{DEFAULT_CONFIG_FILE}"
   end
 
   private
@@ -153,27 +168,33 @@ class SlackbotFrdBin < Thor
 
   private
   def watch_connection(bots, token, botdir, daemonize = false)
+    Process.daemon if daemonize
     until errors
-      pid = Process.fork do
-        Process.daemon if daemonize
-        loop { BotStarter.start_bots(ERROR_FILE, token, botdir, bots) }
-      end
+      pid = Process.fork { BotStarter.start_bots(ERROR_FILE, token, botdir, bots) }
       set_connection_pid(pid)
       Process.wait(pid)
     end
     if errors
-      puts "Could not start connection: #{errors}"
+      SlackbotFrd::Log.error("Slack connection encountered errors: #{errors}")
+      delfile(ERROR_FILE)
     end
+    delete_pid_files
+  end
+
+  private
+  def delfile(file)
+    File.delete(file) if File.exists?(file)
   end
 
   private
   def errors
-    return File.read(ERROR_FILE).split if File.exists?(ERROR_FILE)
+    return File.read(ERROR_FILE).split("\n") if File.exists?(ERROR_FILE)
     nil
   end
 
   private
   def running?(pid)
+    return false unless pid
     begin
       Process.getpgid(pid.to_i)
       return true
@@ -184,12 +205,14 @@ class SlackbotFrdBin < Thor
 
   private
   def watcher_pid
-    File.read(PID_FILE_WATCHER).to_i
+    File.read(PID_FILE_WATCHER).to_i if File.exists?(PID_FILE_WATCHER)
+    nil
   end
 
   private
   def connection_pid
-    File.read(PID_FILE_CONNECTION).to_i
+    File.read(PID_FILE_CONNECTION).to_i if File.exists?(PID_FILE_CONNECTION)
+    nil
   end
 
   private
@@ -204,8 +227,8 @@ class SlackbotFrdBin < Thor
 
   private
   def delete_pid_files
-    File.delete(PID_FILE_WATCHER)
-    File.delete(PID_FILE_CONNECTION)
+    delfile(PID_FILE_WATCHER)
+    delfile(PID_FILE_CONNECTION)
   end
 end
 

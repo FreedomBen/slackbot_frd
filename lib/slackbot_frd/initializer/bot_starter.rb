@@ -15,7 +15,7 @@ class BotStarter
     bot_enabled = ->(bot) { bots.empty? || bots.include?(bot) }
 
     # Create a new Connection to pass to the bot classes
-    slack_connection = SlackbotFrd::SlackConnection.new(token)
+    slack_connection = SlackbotFrd::SlackConnection.new(token, errors_file)
 
     load_bot_files(botdir)
 
