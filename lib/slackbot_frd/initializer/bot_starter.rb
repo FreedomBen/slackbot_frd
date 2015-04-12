@@ -12,8 +12,8 @@ rescue LoadError
 end
 
 class BotStarter
-  def self.start_bots(errors_file, token, botdir, bots)
-    bot_enabled = ->(bot) { bots.empty? || bots.include?(bot) }
+  def self.start_bots(errors_file, token, botdir, enabled_bots)
+    bot_enabled = ->(bot) { enabled_bots.empty? || enabled_bots.include?(bot) }
 
     # Create a new Connection to pass to the bot classes
     slack_connection = SlackbotFrd::SlackConnection.new(token, errors_file)
@@ -24,9 +24,8 @@ class BotStarter
     # instantiate them, and then call their add_callbacks method
     ObjectSpace.each_object(Class).select do |klass|
       if klass != SlackbotFrd::Bot && klass.ancestors.include?(SlackbotFrd::Bot) && bot_enabled.call(klass.name)
-        SlackbotFrd::Log.debug("Instantiating class '#{klass.to_s}'")
+        SlackbotFrd::Log.debug("Instantiating and adding callbacks to class '#{klass.to_s}'")
         b = klass.new
-        SlackbotFrd::Log.debug("Adding callbacks to bot '#{klass}'")
         b.add_callbacks(slack_connection)
         bots.push(b)
       end
