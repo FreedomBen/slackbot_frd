@@ -4,6 +4,17 @@ tl;dr:  This is a ruby framework that makes it easy to write bots that talk on [
 
 The slack web api is good, but very raw.  What you need is a great ruby framework to abstract away all that.  This is it!  This framework allows you to write bots easily by providing methods that are easy to call.  Behind the scenes, the framework is negotiating your real time stream, converting channel names and user names to and from IDs so you can use the names instead, and parsing/classifying the real time messages into useful types that you can hook into.  Don't write your bot without this.
 
+## Why use this framework
+
+* Writing one or more bots is trivial
+* You don't have to worry about using event machine and setting up the real time stream
+* Running your bots continuously is handled for you
+    * This means you can run your bots as a system service
+    * When the connection goes down, it is brought back up for you
+* Extensive logging is built in
+* The Slack API is abstracted into easy ruby methods that take a block
+* Ruby is better than javascript
+
 ## Prestantious!  Eximious!  How do I start?
 
 ### Step 1
