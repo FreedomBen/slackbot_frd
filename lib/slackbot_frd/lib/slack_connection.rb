@@ -25,8 +25,7 @@ module SlackbotFrd
 
     def initialize(token, errors_file)
       unless token
-        SlackbotFrd::Log::error("No token passed to #{self.class}")
-        raise NoTokenError.new
+        log_and_add_to_error_file("No token passed to #{self.class}")
       end
 
       @token = token
@@ -55,11 +54,14 @@ module SlackbotFrd
       SlackbotFrd::Log::info("#{self.class}: starting event machine")
 
       EM.run do
-        wss_url = SlackbotFrd::SlackMethods::RtmStart.wss_url(@token)
+        begin
+          wss_url = SlackbotFrd::SlackMethods::RtmStart.wss_url(@token)
+        rescue SocketError => e
+          log_and_add_to_error_file(socket_error_message(e))
+        end
+
         unless wss_url
-          str = "No Real Time stream opened by slack.  Check for correct authentication token"
-          SlackbotFrd::Log.error(str)
-          File.append(@errors_file, "#{str}\n") if @errors_file
+          log_and_add_to_error_file("No Real Time stream opened by slack.  Check for network connection and correct authentication token")
           return
         end
         @ws = Faye::WebSocket::Client.new(wss_url)
@@ -89,36 +91,49 @@ module SlackbotFrd
     end
 
     def on_message(user = :any, channel = :any, &block)
-      @on_message_callbacks.add(user_name_to_id(user), channel_name_to_id(channel), block)
+      wrap_user_or_channel_lookup_on_callback('on_message', user, channel) do
+        @on_message_callbacks.add(user_name_to_id(user), channel_name_to_id(channel), block)
+      end
     end
 
     def on_channel_left(user = :any, channel = :any, &block)
-      @on_channel_left_callbacks.add(user_name_to_id(user), channel_name_to_id(channel), block)
+      wrap_user_or_channel_lookup_on_callback('on_message_channel_left', user, channel) do
+        @on_channel_left_callbacks.add(user_name_to_id(user), channel_name_to_id(channel), block)
+      end
     end
 
     def on_channel_joined(user = :any, channel = :any, &block)
-      u = user_name_to_id(user)
-      c = channel_name_to_id(channel)
-      @on_channel_joined_callbacks.add(u, c, block)
+      wrap_user_or_channel_lookup_on_callback('on_message_channel_joined', user, channel) do
+        u = user_name_to_id(user)
+        c = channel_name_to_id(channel)
+        @on_channel_joined_callbacks.add(u, c, block)
+      end
     end
 
     def send_message_as_user(channel, message)
       unless @ws
-        SlackbotFrd::Log::error("Cannot send message '#{message}' as user to channel '#{channel}' because not connected to wss stream")
-        raise NotConnectedError.new("Not connected to wss stream")
+        log_and_add_to_error_file("Cannot send message '#{message}' as user to channel '#{channel}' because not connected to wss stream")
       end
 
-      resp = @ws.send({
-        id: event_id,
-        type: "message",
-        channel: channel_name_to_id(channel),
-        text: message
-      }.to_json)
+      SlackbotFrd::Log::debug("#{self.class}: Sending message '#{message}' as user to channel '#{channel}'")
 
-      SlackbotFrd::Log::debug("#{self.class}: sending message '#{message}' as user to channel '#{channel}'.  Response: #{resp}")
+      begin
+        resp = @ws.send({
+          id: event_id,
+          type: "message",
+          channel: channel_name_to_id(channel),
+          text: message
+        }.to_json)
+
+        SlackbotFrd::Log::debug("#{self.class}: Received response:  #{resp}")
+      rescue SocketError => e
+        log_and_add_to_error_file(socket_error_message(e))
+      end
     end
 
     def send_message(channel, message, username, avatar, avatar_is_emoji)
+      SlackbotFrd::Log::debug("#{self.class}: Sending message '#{message}' as user '#{username}' to channel '#{channel}'")
+
       resp = SlackbotFrd::SlackMethods::ChatPostMessage.postMessage(
         @token,
         channel_name_to_id(channel),
@@ -127,7 +142,8 @@ module SlackbotFrd
         avatar,
         avatar_is_emoji
       )
-      SlackbotFrd::Log::debug("#{self.class}: sending message '#{message}' as user '#{username}' to channel '#{channel}'.  Response: #{resp}")
+
+      SlackbotFrd::Log::debug("#{self.class}: Received response:  #{resp}")
     end
 
     def restrict_actions_to_channels_joined(value = true)
@@ -168,6 +184,17 @@ module SlackbotFrd
       end
       SlackbotFrd::Log::warn("#{self.class}: Channel name '#{nc}' not found") unless @channel_name_to_id.include?(nc)
       @channel_name_to_id[nc]
+    end
+
+    private
+    def wrap_user_or_channel_lookup_on_callback(callback_name, user, channel)
+      begin
+        return yield
+      rescue SlackbotFrd::InvalidChannelError => e
+        log_and_add_to_error_file("Unable to add #{callback_name} callback for channel '#{channel}'.  Lookup of channel name to ID failed.  Check network connection, and ensure channel exists and is accessible")
+      rescue SlackbotFrd::InvalidUserError => e
+        log_and_add_to_error_file("Unable to add #{callback_name} callback for user '#{user}'.  Lookup of channel name to ID failed.  Check network connection and ensure user exists")
+      end
     end
 
     private
@@ -254,20 +281,39 @@ module SlackbotFrd
 
     private
     def refresh_user_info
-      users_list = SlackbotFrd::SlackMethods::UsersList.new(@token).connect
-      @user_id_to_name = users_list.ids_to_names
-      @user_name_to_id = users_list.names_to_ids
+      begin
+        users_list = SlackbotFrd::SlackMethods::UsersList.new(@token).connect
+        @user_id_to_name = users_list.ids_to_names
+        @user_name_to_id = users_list.names_to_ids
+      rescue SocketError => e
+        log_and_add_to_error_file(socket_error_message(e))
+      end
     end
 
     private
     def refresh_channel_info
-      channels_list = SlackbotFrd::SlackMethods::ChannelsList.new(@token).connect
-      @channel_id_to_name = channels_list.ids_to_names
-      @channel_name_to_id = channels_list.names_to_ids
+      begin
+        channels_list = SlackbotFrd::SlackMethods::ChannelsList.new(@token).connect
+        @channel_id_to_name = channels_list.ids_to_names
+        @channel_name_to_id = channels_list.names_to_ids
 
-      im_channels_list = SlackbotFrd::SlackMethods::ImChannelsList.new(@token).connect
-      @channel_id_to_name.merge!(im_channels_list.ids_to_names)
-      @channel_name_to_id.merge!(im_channels_list.names_to_ids)
+        im_channels_list = SlackbotFrd::SlackMethods::ImChannelsList.new(@token).connect
+        @channel_id_to_name.merge!(im_channels_list.ids_to_names)
+        @channel_name_to_id.merge!(im_channels_list.names_to_ids)
+      rescue SocketError => e
+        log_and_add_to_error_file(socket_error_message(e))
+      end
+    end
+
+    private
+    def socket_error_message(e)
+      "SocketError: Check your connection: #{e.message}"
+    end
+
+    private
+    def log_and_add_to_error_file(err)
+      SlackbotFrd::Log::error(err)
+      File.append(@errors_file, "#{err}\n")
     end
   end
 end
