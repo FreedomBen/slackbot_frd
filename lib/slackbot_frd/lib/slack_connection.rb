@@ -11,6 +11,7 @@ require 'slackbot_frd/slack_methods/rtm_start'
 require 'slackbot_frd/slack_methods/chat_post_message'
 require 'slackbot_frd/slack_methods/im_channels_list'
 require 'slackbot_frd/slack_methods/channels_list'
+require 'slackbot_frd/slack_methods/channels_info'
 require 'slackbot_frd/slack_methods/users_list'
 
 module SlackbotFrd
@@ -148,6 +149,27 @@ module SlackbotFrd
 
     def restrict_actions_to_channels_joined(value = true)
       @restrict_actions_to_channels_joined = value
+    end
+
+    def users_in_channel(channel)
+      a = SlackMethods::ChannelsInfo.members(@token, channel_name_to_id(channel))
+      a.map{ |id| user_id_to_name(id) }
+    end
+
+    def user_ids(force_refresh = false)
+      @user_id_to_name.keys
+    end
+
+    def user_names(force_refresh = false)
+      @user_name_to_id.keys
+    end
+
+    def channel_ids(force_refresh = false)
+      @user_id_to_name.keys
+    end
+
+    def channel_names(force_refresh = false)
+      @channel_name_to_id.keys
     end
 
     def user_id_to_name(user_id)
