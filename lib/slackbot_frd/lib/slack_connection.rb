@@ -110,7 +110,7 @@ module SlackbotFrd
       end
     end
 
-    def send_message_as_user(channel, message)
+    def send_message(channel, message)
       unless @ws
         log_and_add_to_error_file("Cannot send message '#{message}' as user to channel '#{channel}' because not connected to wss stream")
       end
@@ -131,7 +131,7 @@ module SlackbotFrd
       end
     end
 
-    def send_message(channel, message, username, avatar, avatar_is_emoji)
+    def send_message_as_user(channel, message, username, avatar, avatar_is_emoji)
       SlackbotFrd::Log::debug("#{self.class}: Sending message '#{message}' as user '#{username}' to channel '#{channel}'")
 
       resp = SlackbotFrd::SlackMethods::ChatPostMessage.postMessage(
