@@ -3,7 +3,7 @@ require 'colorize'
 module SlackbotFrd
   class Log
     @levels = {verbose: 1, debug: 2, info: 3, warn: 4, error: 5}
-    @default_level = :debug
+    @default_level = :info
 
     class << self
       attr_writer :level
