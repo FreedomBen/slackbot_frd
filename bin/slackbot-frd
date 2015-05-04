@@ -127,7 +127,6 @@ class SlackbotFrdBin < Thor
 
     SlackbotFrd::Log.warn("Logging to file '#{SlackbotFrd::Log.logfile}'")
     SlackbotFrd::Log.warn("Logging level set to '#{SlackbotFrd::Log.level}'")
-    return
 
     token = json["token"]
     token = ENV["SLACKBOT_FRD_TOKEN"] if ENV["SLACKBOT_FRD_TOKEN"]
