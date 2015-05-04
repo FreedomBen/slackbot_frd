@@ -8,6 +8,7 @@ module SlackbotFrd
     class << self
       attr_writer :level
       attr_accessor :logfile
+      attr_reader :levels
     end
 
     def self.level

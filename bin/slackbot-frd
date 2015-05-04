@@ -69,8 +69,10 @@ class SlackbotFrdBin < Thor
   LONGDESC
   option :daemonize, type: :boolean, aliases: 'd'
   option :botdir, type: :string, aliases: 'b'
-  option 'config-file'.to_sym, type: :string, aliases: 'c'
   option :token, type: :string, aliases: 't'
+  option 'config-file', type: :string, aliases: 'c'
+  option 'log-level', type: :string, aliases: 'll'
+  option 'log-file', type: :string, aliases: 'lf'
   def start(*bots)
     if running?(watcher_pid)
       SlackbotFrd::Log.warn("Already running.  Not starting again")
@@ -80,7 +82,7 @@ class SlackbotFrdBin < Thor
     delete_pid_files
     delfile(ERROR_FILE)
 
-    config_file = options['config-file'.to_sym]
+    config_file = options['config-file']
     config_file = config_file_location unless config_file
     json = config_file_json(config_file) if config_file
     json ||= {}
@@ -97,7 +99,35 @@ class SlackbotFrdBin < Thor
     botdir = File.expand_path(botdir)
 
     SlackbotFrd::Log.logfile = "#{botdir}/#{LOG_FILE}"
+    SlackbotFrd::Log.logfile = json["log_file"] if json["log_file"]
+    SlackbotFrd::Log.logfile = ENV["SLACKBOT_FRD_LOG_FILE"] if ENV["SLACKBOT_FRD_LOG_FILE"]
+    SlackbotFrd::Log.logfile = options["log-file"] if options['log-file']
+
+    SlackbotFrd::Log.level = :info
+    SlackbotFrd::Log.level = json["log_level"] if json["log_level"]
+    SlackbotFrd::Log.level = ENV["SLACKBOT_FRD_LOG_LEVEL"] if ENV["SLACKBOT_FRD_LOG_LEVEL"]
+    SlackbotFrd::Log.level = options["log-level"] if options['log-level']
+
+    # If we got a number for log level that is valid, just use that
+    if SlackbotFrd::Log.level =~ /\d+/ && SlackbotFrd::Log.levels.values.include?(SlackbotFrd::Log.level.to_i)
+      SlackbotFrd::Log.level = SlackbotFrd::Log.levels.key(SlackbotFrd::Log.level.to_i)
+    else
+      SlackbotFrd::Log.level = SlackbotFrd::Log.level.to_sym
+    end
+
+    if !SlackbotFrd::Log.levels.keys.include?(SlackbotFrd::Log.level) &&
+       !SlackbotFrd::Log.levels.values.include?(SlackbotFrd::Log.level)
+      setval = SlackbotFrd::Log.level
+      SlackbotFrd::Log.level = :info
+      SlackbotFrd::Log.error("Invalid log level '#{setval}'.  Possible levels: #{SlackbotFrd::Log.levels.keys.map(&:to_s).join(" | ")}")
+      return
+    end
+
     SlackbotFrd::Log.info("Logging to file '#{SlackbotFrd::Log.logfile}'")
+
+    SlackbotFrd::Log.warn("Logging to file '#{SlackbotFrd::Log.logfile}'")
+    SlackbotFrd::Log.warn("Logging level set to '#{SlackbotFrd::Log.level}'")
+    return
 
     token = json["token"]
     token = ENV["SLACKBOT_FRD_TOKEN"] if ENV["SLACKBOT_FRD_TOKEN"]

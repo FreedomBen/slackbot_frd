@@ -44,7 +44,9 @@ You have 3 options for configuring slackbot_frd.  In the event that you do more 
             "bots" : [
                 "EchoBot",
                 "GreetingBot"
-            ]
+            ],
+            "log-level" : "info",
+            "log-file" : "my-cool-bot.log"
         }
         ```
 
@@ -52,8 +54,10 @@ You have 3 options for configuring slackbot_frd.  In the event that you do more 
     * `SLACKBOT_FRD_TOKEN="<your-token>"`
     * `SLACKBOT_FRD_BOTDIR="/directory/containing/bots"`
     * `SLACKBOT_FRD_DAEMONIZE="y"  # Any non-null value works here`
+    * `SLACKBOT_FRD_LOG_LEVEL="info"`
+    * `SLACKBOT_FRD_LOG_FILE="my-cool-bot.log"`
 3. Command line arguments
-    * `slackbot-frd start --daemonize --token "<your-token>" --botdir "."`
+    * `slackbot-frd start --daemonize --token="<your-token>" --botdir="." --log-level="info" --log-file="my-cool-bot.log"`
 
 ### Step 3
 
@@ -130,6 +134,22 @@ The following configuration options are available.  Where applicable, defaults a
         <td>all</td>
         <td>These are the bots that will be run by the framework</td>
     </tr>
+    <tr>
+        <td>Log level</td>
+        <td>"log_level"</td>
+        <td>SLACKBOT_FRD_LOG_LEVEL</td>
+        <td>-ll or --log-level</td>
+        <td>info</td>
+        <td>This sets the log level of the framework</td>
+    </tr>
+    <tr>
+        <td>Log file</td>
+        <td>"log_file"</td>
+        <td>SLACKBOT_FRD_LOG_FILE</td>
+        <td>-lf or --log-file</td>
+        <td>my-cool-bot.log</td>
+        <td>This sets the log file used by the framework</td>
+    </tr>
 </table>
 
 ## Subclassing Bot
@@ -187,7 +207,6 @@ If you are going ultra simple and just want to make api calls without establishi
     )
 
 This simple method can give you a lot of power.  For instance, I use this at work to post reminders for daily standups.  I just call the script from a [cron](http://en.wikipedia.org/wiki/Cron) job.
-
 
 ## Cool Tricks
 
