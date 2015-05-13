@@ -3,6 +3,8 @@
 require 'thor'
 require 'json'
 
+require 'active_support/core_ext/string'
+
 require 'slackbot_frd/initializer/bot_starter'
 require 'slackbot_frd/lib/slack_connection'
 require 'slackbot_frd/lib/bot'
@@ -41,13 +43,44 @@ class SlackbotFrdBin < Thor
     end
   end
 
+  desc "new", "Generate a new slackbot_frd project"
+  long_desc <<-LONGDESC
+    new will generate a skeleton for a new slackbot_frd project
+  LONGDESC
+  option :nospec, type: :boolean, aliases: 'n'
+  def new(proj_name)
+    if Dir.exists?(proj_name)
+      puts "Directory '#{proj_name}' already exists".red
+      return
+    end
+    Dir.mkdir(proj_name)
+    Dir.chdir(proj_name)
+    genconfig
+    File.write("Gemfile", <<-GEMFILE.strip_heredoc)
+      source "https://rubygems.org"
+
+      gem "slackbot_frd"
+    GEMFILE
+    Dir.mkdir("bots")
+    write_example_bot("bots/example_bot.rb")
+    Dir.mkdir("lib")
+
+    unless options[:nospec]
+      File.append("Gemfile", <<-GEMFILE.strip_heredoc)
+
+      gem "rspec", "~> 3.2"
+      GEMFILE
+      Dir.mkdir("spec")
+    end
+  end
+
   desc "genconfig", "Generate a skeleton config file"
   long_desc <<-LONGDESC
     genconfig will generate a skeleton config file that
     can be customized
   LONGDESC
   def genconfig
-    File.write(config_file_location, <<-CONFIG_FILE_SKELETON)
+    File.write(config_file_location, <<-CONFIG_FILE_SKELETON.strip_heredoc)
       {
           "token" : "<put-token-here>",
           "botdir" : ".",
@@ -268,6 +301,34 @@ class SlackbotFrdBin < Thor
   def delete_pid_files
     delfile(PID_FILE_WATCHER)
     delfile(PID_FILE_CONNECTION)
+  end
+
+  private
+  def write_example_bot(file)
+    File.write(file, <<-EXAMPLE_BOT.strip_heredoc)
+      require 'slackbot_frd'
+
+      # Subclass SlackbotFrd::Bot so that slackbot-frd start runs our bot
+      class ExampleBot < SlackbotFrd::Bot
+        def add_callbacks(slack_connection)
+          # When a user sends a message, echo that message back in reverse
+          slack_connection.on_message do |user, channel, message|
+            slack_connection.send_message(channel, message.reverse)
+          end
+
+          # When a user joins a channel, greet that user as a bot
+          slack_connection.on_channel_joined do |user, channel|
+            slack_connection.send_message_as_user(
+              channel,
+              ":skull: ohai \#{user}, welcome to #\#{channel}! :ghost:",
+              "Graveyard Greeting Bot",
+              ":graveyard:",
+              true
+            )
+          end
+        end
+      end
+    EXAMPLE_BOT
   end
 end
 
