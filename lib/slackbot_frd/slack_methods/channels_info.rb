@@ -24,10 +24,13 @@ module SlackbotFrd
       end
 
       def members
-        @response["channel"]["members"]
+        if @response["channel"]
+          @response["channel"]["members"]
+        else
+          []
+        end
       end
       alias_method :users, :members
-
     end
   end
 end
