@@ -85,7 +85,8 @@ class SlackbotFrdBin < Thor
           "token" : "<put-token-here>",
           "botdir" : ".",
           "daemonize" : false,
-          "bots" : []
+          "bots" : [],
+          "my_bots_config_option" : "<bot-specific-option>"
       }
     CONFIG_FILE_SKELETON
   end
@@ -117,27 +118,28 @@ class SlackbotFrdBin < Thor
 
     config_file = options['config-file']
     config_file = config_file_location unless config_file
-    json = config_file_json(config_file) if config_file
-    json ||= {}
+    $slackbotfrd_conf = config_file_json(config_file) if config_file
+    $slackbotfrd_conf ||= {}
+    $slackbotfrd_conf.freeze
 
     daemonize = false
-    daemonize = json["daemonize"] if json["daemonize"]
+    daemonize = $slackbotfrd_conf["daemonize"] if $slackbotfrd_conf["daemonize"]
     daemonize = ENV["SLACKBOT_FRD_DAEMONIZE"] if ENV["SLACKBOT_FRD_DAEMONIZE"]
     daemonize = options[:daemonize] if options[:daemonize]
 
     botdir = Dir.pwd
-    botdir = json["botdir"] if json["botdir"]
+    botdir = $slackbotfrd_conf["botdir"] if $slackbotfrd_conf["botdir"]
     botdir = ENV["SLACKBOT_FRD_BOTDIR"] if ENV["SLACKBOT_FRD_BOTDIR"]
     botdir = options[:botdir] if options[:botdir]
     botdir = File.expand_path(botdir)
 
     SlackbotFrd::Log.logfile = "#{botdir}/#{LOG_FILE}"
-    SlackbotFrd::Log.logfile = json["log_file"] if json["log_file"]
+    SlackbotFrd::Log.logfile = $slackbotfrd_conf["log_file"] if $slackbotfrd_conf["log_file"]
     SlackbotFrd::Log.logfile = ENV["SLACKBOT_FRD_LOG_FILE"] if ENV["SLACKBOT_FRD_LOG_FILE"]
     SlackbotFrd::Log.logfile = options["log-file"] if options['log-file']
 
     SlackbotFrd::Log.level = :info
-    SlackbotFrd::Log.level = json["log_level"] if json["log_level"]
+    SlackbotFrd::Log.level = $slackbotfrd_conf["log_level"] if $slackbotfrd_conf["log_level"]
     SlackbotFrd::Log.level = ENV["SLACKBOT_FRD_LOG_LEVEL"] if ENV["SLACKBOT_FRD_LOG_LEVEL"]
     SlackbotFrd::Log.level = options["log-level"] if options['log-level']
 
@@ -161,7 +163,7 @@ class SlackbotFrdBin < Thor
     SlackbotFrd::Log.warn("Logging to file '#{SlackbotFrd::Log.logfile}'")
     SlackbotFrd::Log.warn("Logging level set to '#{SlackbotFrd::Log.level}'")
 
-    token = json["token"]
+    token = $slackbotfrd_conf["token"]
     token = ENV["SLACKBOT_FRD_TOKEN"] if ENV["SLACKBOT_FRD_TOKEN"]
     token = options[:token] if options[:token]
     unless token

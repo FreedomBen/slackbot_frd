@@ -34,6 +34,7 @@ You have 3 options for configuring slackbot_frd.  In the event that you do more 
     * Is parsed as JSON.
     * All portions are optional except token (unless token is specified elsewhere)
     * If JSON doesn't contain "bots" then all bots will be run
+    * All config options are available to your bots through the global variable '$slackbotfrd_conf', so you can put stuff here (like an API key for your bot's functionality)
     * Example: 
 
         ```
@@ -46,7 +47,8 @@ You have 3 options for configuring slackbot_frd.  In the event that you do more 
                 "GreetingBot"
             ],
             "log-level" : "info",
-            "log-file" : "my-cool-bot.log"
+            "log-file" : "my-cool-bot.log",
+            "my_bots_config_option" : "<bot-specific-option>"
         }
         ```
 
