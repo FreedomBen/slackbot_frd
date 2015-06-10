@@ -109,7 +109,7 @@ class SlackbotFrdBin < Thor
   option 'log-file', type: :string, aliases: 'lf'
   def start(*bots)
     if running?(watcher_pid)
-      SlackbotFrd::Log.warn("Already running.  Not starting again")
+      SlackbotFrd::Log.warn("Already running (watcher pid: '#{watcher_pid}').  Not starting again")
       return
     end
 

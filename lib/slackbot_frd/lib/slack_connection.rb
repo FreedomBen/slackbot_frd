@@ -144,7 +144,19 @@ module SlackbotFrd
         avatar_is_emoji
       )
 
-      SlackbotFrd::Log::debug("#{self.class}: Received response:  #{resp}")
+      SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
+    end
+
+    def invite_user(user, channel)
+      SlackbotFrd::Log.debug("#{self.class}: Inviting user '#{user}' to channel '#{channel}'")
+
+      resp = SlackbotFrd::SlackMethods::ChannelsInvite.invite(
+        @token,
+        user_name_to_id(user),
+        channel_name_to_id(channel),
+      )
+
+      SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
     end
 
     def restrict_actions_to_channels_joined(value = true)
