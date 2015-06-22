@@ -202,10 +202,10 @@ If you are going ultra simple and just want to make api calls without establishi
 
     ChatPostMessage.postMessage(
         '<dis-be-my-token-sucka>',
-        '#fun_room',
-        'Oh, ah, ah, ah, ah',
-        'Down With The Sickness Bot',
-        ':devil:'
+        '#fun_room',                  # channel to post to
+        'Oh, ah, ah, ah, ah',         # Text to post
+        'Down With The Sickness Bot', # Name of your bot
+        ':devil:'                     # emoji to use as your bot's avatar
     )
 
 This simple method can give you a lot of power.  For instance, I use this at work to post reminders for daily standups.  I just call the script from a [cron](http://en.wikipedia.org/wiki/Cron) job.
