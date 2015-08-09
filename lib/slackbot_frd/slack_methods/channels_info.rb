@@ -9,11 +9,11 @@ module SlackbotFrd
 
       attr_reader :response
 
-      def self.members(token, channel)
-        ChannelsInfo.new(token, channel).connect.members
+      def self.members(token:, channel:)
+        ChannelsInfo.new(token: token, channel: channel).connect.members
       end
 
-      def initialize(token, channel)
+      def initialize(token:, channel:)
         @token = token
         @channel = channel
       end

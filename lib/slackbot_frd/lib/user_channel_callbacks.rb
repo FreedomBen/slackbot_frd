@@ -8,7 +8,7 @@ module SlackbotFrd
       @conditions[:any][:any] = []
     end
 
-    def init(user, channel)
+    def init(user:, channel:)
       unless user
         Log::error("#{self.class}: Invalid user '#{user}'")
         raise InvalidUserError.new
@@ -23,13 +23,13 @@ module SlackbotFrd
       @conditions[user][channel] ||= []
     end
 
-    def add(user, channel, callback)
-      init(user, channel)
+    def add(user:, channel:, callback:)
+      init(user: user, channel: channel)
       @conditions[user][channel].push(callback)
     end
 
-    def where(user, channel)
-      init(user, channel)
+    def where(user:, channel:)
+      init(user: user, channel: channel)
       @conditions[user][channel] || []
     end
 
@@ -37,8 +37,8 @@ module SlackbotFrd
       @conditions[:any][:any] || []
     end
 
-    def where_include_all(user, channel)
-      init(user, channel)
+    def where_include_all(user:, channel:)
+      init(user: user, channel: channel)
       retval = @conditions[:any][:any].dup || []
       retval.concat(@conditions[user][:any] || [])
       retval.concat(@conditions[:any][channel] || [])

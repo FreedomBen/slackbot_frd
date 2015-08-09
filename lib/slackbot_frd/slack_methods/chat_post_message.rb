@@ -7,18 +7,25 @@ module SlackbotFrd
       include HTTParty
       base_uri 'https://slack.com/api/chat.postMessage'
 
-      def self.postMessage(token, channel, message, username = nil, avatar = nil, avatar_is_emoji = nil)
-        r = ChatPostMessage.new(token, channel, message, username, avatar, avatar_is_emoji)
+      def self.postMessage(token:, channel:, message:, username: nil, avatar_emoji: nil, avatar_url: nil)
+        r = ChatPostMessage.new(
+          token: token,
+          channel: channel,
+          message: message,
+          username: username,
+          avatar_emoji: avatar_emoji,
+          avatar_url: avatar_url
+        )
         r.postMessage
       end
 
-      def initialize(token, channel, message, username = nil, avatar = nil, avatar_is_emoji = nil)
+      def initialize(token:, channel:, message:, username: nil, avatar_emoji: nil, avatar_url: nil)
         @token = token
         @channel = channel
         @message = message
         @username = username
-        @avatar = avatar
-        @avatar_is_emoji = avatar_is_emoji
+        @avatar_emoji = avatar_emoji
+        @avatar_url = avatar_url
       end
 
       def postMessage
@@ -31,8 +38,8 @@ module SlackbotFrd
         if @username
           body.merge!({ username: @username })
 
-          if @avatar_is_emoji
-            body.merge!({ icon_emoji: @avatar })
+          if @avatar_emoji
+            body.merge!({ icon_emoji: @avatar_emoji })
           else
             body.merge!({ icon_url: @avatar })
           end

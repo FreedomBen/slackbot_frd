@@ -1,6 +1,6 @@
 # Slackbot FRD (Slackbot For Realz Dude)
 
-tl;dr:  This is a ruby framework that makes it easy to write bots that talk on [Slack](https://slack.com/).  It puts rails to shame.
+tl;dr:  This is a ruby framework that makes it easy to write bots that talk on [Slack](https://slack.com/).  It puts rails to shame.  Requires Ruby 2.1 or newer.
 
 The slack web api is good, but very raw.  What you need is a great ruby framework to abstract away all that.  This is it!  This framework allows you to write bots easily by providing methods that are easy to call.  Behind the scenes, the framework is negotiating your real time stream, converting channel names and user names to and from IDs so you can use the names instead, and parsing/classifying the real time messages into useful types that you can hook into.  Don't write your bot without this.
 
@@ -75,8 +75,8 @@ Subclass `SlackbotFrd::Bot` and do something cool.  Here's the entire implementa
 
     class EchoBot < SlackbotFrd::Bot
       def add_callbacks(slack_connection)
-        slack_connection.on_message do |user, channel, message|
-          slack_connection.send_message_as_user(channel, message) if user != :bot
+        slack_connection.on_message do |user:, channel:, message:|
+          slack_connection.send_message_as_user(channel: channel, message: message) if user != :bot
         end
       end
     end
@@ -162,33 +162,35 @@ In your subclass of `SlackbotFrd::Bot`, you will need to override the `add_callb
 
 All of your bot's actions (such as listening for and responding to events) will be taken through this object.  The most common thing you'll want to do is listen for an incoming chat message:
 
-    slack_connection.on_message(:any, :any) do |user, channel, message|
+    slack_connection.on_message(:any, :any) do |user:, channel:, message:|
 
 or more simply (these are equivalent)
 
-    slack_connection.on_message do |user, channel, message|
+    slack_connection.on_message do |user:, channel:, message:|
 
-The two arguments you see passed (:any, :any) are ways to filter which messages trigger this callback.  The first argument is for user, and the second is for channel.  For example, if you only wanted to respond to messages from user "Derek," and only in channel #games,  it would be:
+The two arguments you see passed (user: :any, channel: :any) are ways to filter which messages trigger this callback.  The first argument is for user, and the second is for channel.  For example, if you only wanted to respond to messages from user "Derek," and only in channel #games,  it would be:
 
-    slack_connection.on_message('derek', 'games') do |user, channel, message|
+    slack_connection.on_message(user: 'derek', channel: 'games') do |user:, channel:, message:, timestamp:|
 
-The arguments passed to your block are the 'user' (The username), the 'channel', (the channel name without the leading #), and the 'message', (the text of the message).  If the message was posted by a bot, then 'user' will equal :bot.
+The arguments passed to your block are the 'user' (The user's username), the 'channel', (the channel name without the leading #), and the 'message', (the text of the message).  If the message was posted by a bot, then 'user' will equal :bot.
 
-You can respond to events by sending messages through the slack_connection.  There are two methods for this use:
+You can respond to events by sending messages through the slack_connection.  if username and avatar are not specified, the message is posted as the user who owns the token (so your bot user if you're running as a bot, or your actual user if you are running as yourself).  NOTE: You only specify either an emoji for your avatar or a URL.  If you specify both, it's going to show up as the emoji:
 
-    slack_connection.send_message(channel, message, username, avatar, avatar_is_emoji)
-
-or:
-
-    slack_connection.send_message_as_user(channel, message)
+    slack_connection.send_message(
+      channel: channel,
+      messge: message,
+      username: username,
+      avatar_emoji: avatar_emoji,  # specify either an emoji or a url, but not both
+      avatar_url: avatar_url
+    )
 
 Here are events that you may wish to listen for:
 
     on_connected()
     on_close()
-    on_message(user, channel)
-    on_channel_joined(user, channel)
-    on_channel_left(user, channel)
+    on_message(user:, channel:, timestamp:)
+    on_channel_joined(user:, channel:)
+    on_channel_left(user:, channel:)
 
 ## Directly calling slack methods
 
@@ -220,11 +222,10 @@ You can post a chat message that appears to come from a "bot," using only your u
 
     ```
     slack_connection.send_message(
-        channel,
-        message,
-        username_to_show,
-        avatar_emoji_or_url,
-        true_if_avatar_is_emoji
+        channel: channel,
+        message: message,
+        username: username_to_show,
+        avatar_emoji: avatar_emoji  # or avatar_url: avatar_url if using a URL
     )
     ```
 
@@ -232,18 +233,17 @@ You can post a chat message that appears to come from a "bot," using only your u
 
     ```
     ChatPostMessage.postMessage(
-        channel,
-        message,
-        username_to_show,
-        avatar_emoji_or_url,
-        true_if_avatar_is_emoji
+        channel: channel,
+        message: message,
+        username: username_to_show,
+        avatar_emoji: avatar_emoji  # or avatar_url: avatar_url if using a URL
     )
     ```
 
 ## How do I set up incoming webhooks with this?
 
-That's coming later.  Soon this will be usable as a rails engine which gives you full active record and a router.  Why rails?  Cause that's what I use.
+That's coming later.  Soon this will be usable as a rails engine which gives you full active record and a router.  Why rails?  Cause it's ruby and rails is awesome.
 
 ## Bugs, Features, and Contributions
 
-This is a very young and incomplete project. Please open bugs and send pull requests!
+This is a very young and incomplete project, but I am striving to keep the docs up to date.  Please open bugs and send pull requests!

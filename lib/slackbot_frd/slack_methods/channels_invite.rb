@@ -9,11 +9,11 @@ module SlackbotFrd
 
       attr_reader :response
 
-      def self.invite(token, user, channel)
-        ChannelsInvite.new(token, user, channel).run
+      def self.invite(token:, user:, channel:)
+        ChannelsInvite.new(token: token, user: user, channel: channel).run
       end
 
-      def initialize(token, user, channel)
+      def initialize(token:, user:, channel:)
         @token = token
         @user = user
         @channel = channel

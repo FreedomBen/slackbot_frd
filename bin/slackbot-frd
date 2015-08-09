@@ -316,18 +316,17 @@ class SlackbotFrdBin < Thor
       class ExampleBot < SlackbotFrd::Bot
         def add_callbacks(slack_connection)
           # When a user sends a message, echo that message back in reverse
-          slack_connection.on_message do |user, channel, message|
-            slack_connection.send_message(channel, message.reverse)
+          slack_connection.on_message do |user:, channel:, message:, timestamp:|
+            slack_connection.send_message(channel: channel, message: message.reverse)
           end
 
           # When a user joins a channel, greet that user as a bot
-          slack_connection.on_channel_joined do |user, channel|
+          slack_connection.on_channel_joined do |user:, channel:|
             slack_connection.send_message_as_user(
-              channel,
-              ":skull: ohai \#{user}, welcome to #\#{channel}! :ghost:",
-              "Graveyard Greeting Bot",
-              ":graveyard:",
-              true
+              channel: channel,
+              message: ":skull: ohai \#{user}, welcome to #\#{channel}! :ghost:",
+              username: "Graveyard Greeting Bot",
+              emoji: ":graveyard:"
             )
           end
         end
