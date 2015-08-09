@@ -43,7 +43,7 @@ class SlackbotFrdBin < Thor
     end
   end
 
-  desc "new", "Generate a new slackbot_frd project"
+  desc "new <project-name>", "Generate a new slackbot_frd project"
   long_desc <<-LONGDESC
     new will generate a skeleton for a new slackbot_frd project
   LONGDESC
@@ -86,6 +86,8 @@ class SlackbotFrdBin < Thor
           "botdir" : ".",
           "daemonize" : false,
           "bots" : [],
+          "log_level" : "debug",
+          "log_file" : "my-cool-bot.log",
           "my_bots_config_option" : "<bot-specific-option>"
       }
     CONFIG_FILE_SKELETON

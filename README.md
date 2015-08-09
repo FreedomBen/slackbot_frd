@@ -46,8 +46,8 @@ You have 3 options for configuring slackbot_frd.  In the event that you do more 
                 "EchoBot",
                 "GreetingBot"
             ],
-            "log-level" : "info",
-            "log-file" : "my-cool-bot.log",
+            "log_level" : "debug",
+            "log_file" : "my-cool-bot.log",
             "my_bots_config_option" : "<bot-specific-option>"
         }
         ```
