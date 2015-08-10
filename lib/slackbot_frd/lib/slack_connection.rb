@@ -302,17 +302,31 @@ module SlackbotFrd
     end
 
     private
+    def extract_user(message)
+      user = message["user"]
+      user = :bot if message["subtype"] == "bot_message"
+      user = message["message"]["user"] if !user && message["message"]
+      user
+    end
+
+    private
+    def extract_text(message)
+      text = message["text"]
+      text = message["message"]["text"] if !text && message["message"]
+      text
+    end
+
+    private
     def process_chat_message(message)
       SlackbotFrd::Log.verbose("#{self.class}: Processing chat message: #{message}")
 
-      user = message["user"]
-      user = :bot if message["subtype"] == "bot_message"
+      user = extract_user(message)
       channel = message["channel"]
-      text = message["text"]
+      text = extract_text(message)
       ts = message["ts"]
 
       unless user
-        SlackbotFrd::Log.warn("#{self.class}: Chat message doesn't include user! message: #{message}")
+        SflackbotFrd::Log.warn("#{self.class}: Chat message doesn't include user! message: #{message}")
         return
       end
 
