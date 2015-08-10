@@ -326,7 +326,7 @@ module SlackbotFrd
       ts = message["ts"]
 
       unless user
-        SflackbotFrd::Log.warn("#{self.class}: Chat message doesn't include user! message: #{message}")
+        SlackbotFrd::Log.warn("#{self.class}: Chat message doesn't include user! message: #{message}")
         return
       end
 
