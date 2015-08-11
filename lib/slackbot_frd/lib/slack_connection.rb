@@ -167,7 +167,7 @@ module SlackbotFrd
     end
 
     def users_in_channel(channel)
-      a = SlackMethods::ChannelsInfo.members(@token, channel_name_to_id(channel))
+      a = SlackMethods::ChannelsInfo.members(token: @token, channel: channel_name_to_id(channel))
       a.map{ |id| user_id_to_name(id) }
     end
 
