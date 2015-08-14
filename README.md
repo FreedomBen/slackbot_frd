@@ -172,7 +172,7 @@ The two arguments you see passed (user: :any, channel: :any) are ways to filter 
 
     slack_connection.on_message(user: 'derek', channel: 'games') do |user:, channel:, message:, timestamp:|
 
-The arguments passed to your block are the 'user' (The user's username), the 'channel', (the channel name without the leading #), and the 'message', (the text of the message).  If the message was posted by a bot, then 'user' will equal :bot.
+The arguments passed to your block are the 'user' (The user's username), the 'channel', (the channel name without the leading #), and the 'message', (the text of the message).  If the message was posted by a bot, then 'user' will equal `:bot`.
 
 You can respond to events by sending messages through the slack_connection.  if username and avatar are not specified, the message is posted as the user who owns the token (so your bot user if you're running as a bot, or your actual user if you are running as yourself).  NOTE: You only specify either an emoji for your avatar or a URL.  If you specify both, it's going to show up as the emoji:
 
