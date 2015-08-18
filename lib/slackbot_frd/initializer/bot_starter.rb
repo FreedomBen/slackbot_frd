@@ -2,6 +2,7 @@
 
 require 'file-append'
 require 'thor'
+require 'active_support/all'
 
 require 'slackbot_frd/lib/slack_connection'
 require 'slackbot_frd/lib/bot'
@@ -13,7 +14,11 @@ end
 
 class BotStarter
   def self.start_bots(errors_file, token, botdir, enabled_bots)
-    bot_enabled = ->(bot) { enabled_bots.empty? || enabled_bots.include?(bot) }
+    bot_enabled = ->(bot) do
+      enabled_bots.empty? ||
+      enabled_bots.include?(bot) ||
+      enabled_bots.include?(bot.gsub("-", "_").camelize)
+    end
 
     # Create a new Connection to pass to the bot classes
     slack_connection = SlackbotFrd::SlackConnection.new(token, errors_file)
