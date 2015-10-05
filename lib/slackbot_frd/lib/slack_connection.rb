@@ -310,6 +310,13 @@ module SlackbotFrd
     end
 
     private
+    def extract_ts(message)
+      ts = message["ts"]
+      ts = message["message"]["ts"] if message["message"] && message["message"]["ts"]
+      ts
+    end
+
+    private
     def extract_text(message)
       text = message["text"]
       text = message["message"]["text"] if !text && message["message"]
@@ -323,7 +330,7 @@ module SlackbotFrd
       user = extract_user(message)
       channel = message["channel"]
       text = extract_text(message)
-      ts = message["ts"]
+      ts = extract_ts(message)
 
       unless user
         SlackbotFrd::Log.warn("#{self.class}: Chat message doesn't include user! message: #{message}")
