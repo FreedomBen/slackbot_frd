@@ -186,7 +186,6 @@ class SlackbotFrdBin < Thor
 
     > $ slackbot-frd stop -- Stop all running bots
   LONGDESC
-
   def stop
     # first kill the watcher, then kill the connection
     kill_pid(watcher_pid)
@@ -194,6 +193,19 @@ class SlackbotFrdBin < Thor
 
     delete_pid_files
     delfile(ERROR_FILE)
+  end
+
+  desc "bump", "Kill the bots, but not the watcher"
+  long_desc <<-LONGDESC
+    bump will kill the connection process, but not the watcher.
+    this causes the watcher to restart the connection.  This
+    can be helpful when your slack connection is lost but
+    the WSS event stream is not terminated
+
+    > $ slackbot-frd bump -- Kill all running bots
+  LONGDESC
+  def bump
+    kill_pid(connection_pid)
   end
 
   desc "restart", "Stop all bots and restart them"
