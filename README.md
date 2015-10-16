@@ -85,7 +85,7 @@ Subclass `SlackbotFrd::Bot` and do something cool.  Here's the entire implementa
     class EchoBot < SlackbotFrd::Bot
       def add_callbacks(slack_connection)
         slack_connection.on_message do |user:, channel:, message:|
-          slack_connection.send_message_as_user(channel: channel, message: message) if user != :bot
+          slack_connection.send_message(channel: channel, message: message) if user != :bot
         end
       end
     end
@@ -171,15 +171,13 @@ In your subclass of `SlackbotFrd::Bot`, you will need to override the `add_callb
 
 All of your bot's actions (such as listening for and responding to events) will be taken through this object.  The most common thing you'll want to do is listen for an incoming chat message:
 
-    slack_connection.on_message(:any, :any) do |user:, channel:, message:|
-
-or more simply (these are equivalent)
-
     slack_connection.on_message do |user:, channel:, message:|
 
-The two arguments you see passed (user: :any, channel: :any) are ways to filter which messages trigger this callback.  The first argument is for user, and the second is for channel.  For example, if you only wanted to respond to messages from user "Derek," and only in channel #games,  it would be:
+You can also pass two arguments (user:, channel:) to filter which messages trigger this callback.  For example, if you only wanted to respond to messages from user "Derek," and only in channel #games,  it would be:
 
     slack_connection.on_message(user: 'derek', channel: 'games') do |user:, channel:, message:, timestamp:|
+
+You can also pass the symbol `:any` to match any user or any channel.
 
 The arguments passed to your block are the 'user' (The user's username), the 'channel', (the channel name without the leading #), and the 'message', (the text of the message).  If the message was posted by a bot, then 'user' will equal `:bot`.
 
@@ -249,9 +247,9 @@ You can post a chat message that appears to come from a "bot," using only your u
     )
     ```
 
-## How do I set up incoming webhooks with this?
+## How do I set up incoming/outgoing webhooks with this?
 
-That's coming later.  Soon this will be usable as a rails engine which gives you full active record and a router.  Why rails?  Cause it's ruby and rails is awesome.
+This framework uses the Real-time Messaging API from slack, which is much more powerful than incoming/outgoing webhooks (which are quite simple).  If you want to use incoming/outgoing webhooks, I suggest either rails or sinatra.  Note that in order to set up hooks, you will need to have admin powers or be granted that permission by an admin.
 
 ## Bugs, Features, and Contributions
 
