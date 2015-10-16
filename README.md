@@ -16,7 +16,9 @@ The slack web api is good, but very raw.  What you need is a great ruby framewor
 * The Slack API is abstracted into easy ruby methods that take a block
 * Ruby is better than javascript
 
-## Quick Reference (Getting Started information is below):
+## Quick Reference:
+## Prestantious!  Eximious!  How do I start?
+(Getting Started information can be found [below](#prestantious--eximious--how-do-i-start)):
 
 ### Events
 Here are events that you may wish to listen for (put inside your `add_callbacks(slack_connection)` method in your `Bot` subclass:
