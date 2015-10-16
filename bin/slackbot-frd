@@ -334,7 +334,7 @@ class SlackbotFrdBin < Thor
 
           # When a user joins a channel, greet that user as a bot
           slack_connection.on_channel_joined do |user:, channel:|
-            slack_connection.send_message_as_user(
+            slack_connection.send_message(
               channel: channel,
               message: ":skull: ohai \#{user}, welcome to #\#{channel}! :ghost:",
               username: "Graveyard Greeting Bot",
