@@ -6,6 +6,7 @@ The slack web api is good, but very raw.  What you need is a great ruby framewor
 
 ## Why use this framework
 
+* You get to use the RTM API for free - no bothering with incoming/outgoing hooks
 * Writing one or more bots is trivial
 * You don't have to worry about using event machine and setting up the real time stream
 * Running your bots continuously is handled for you
@@ -19,13 +20,21 @@ The slack web api is good, but very raw.  What you need is a great ruby framewor
 
 ### Step 1
 
-First, get a slack API token.  You can do this as your regular user, or (if you have admin powers) you can create a bot user.
+First, get a slack API token.  You can usually do this as your regular user unless restricted, or (if you have admin powers) you can create a bot user.
 
 To get a token as your regular user, go to [https://api.slack.com/web](https://api.slack.com/web), scroll down to "Authentication," then issue yourself a token.
 
-Go [here](https://my.slack.com/services/new/bot) and do the dance to make a bot user.  Copy the bot user's token for later.
+Or to make a bot user, go [here](https://my.slack.com/services/new/bot) and do the dance to make a bot user.  Copy the bot user's token for later.
 
 ### Step 2
+
+All slackbot_frd needs is to be configured and told where the bot files are.  However, a sample project with config files can be created to give you an easy starting point.
+
+You can generate an example bot using the `slackbot-frd` binary:
+
+    slackbot-frd new <proj-name>
+
+This is nice (but optional) cause you can just edit the generated files and be on your way quickly.
 
 You have 3 options for configuring slackbot_frd.  In the event that you do more than one of these, the *latter* one will trump (In other words, if you have a config file *and* environment variables set, the environment variables will win out (see [below](#configuration-options) for an enumeration of config options):
 
@@ -202,7 +211,7 @@ If you are going ultra simple and just want to make api calls without establishi
     # and don't care about loading more than you need
     require 'slackbot_frd/lib/slack_methods/chat_post_message'
 
-    ChatPostMessage.postMessage(
+    SlackbotFrd::SlackMethods::ChatPostMessage.postMessage(
         '<dis-be-my-token-sucka>',
         '#fun_room',                  # channel to post to
         'Oh, ah, ah, ah, ah',         # Text to post
@@ -232,7 +241,7 @@ You can post a chat message that appears to come from a "bot," using only your u
 * Directly using `ChatPostMessage`:
 
     ```
-    ChatPostMessage.postMessage(
+    SlackbotFrd::SlackMethods::ChatPostMessage.postMessage(
         channel: channel,
         message: message,
         username: username_to_show,
