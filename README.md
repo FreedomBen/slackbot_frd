@@ -16,6 +16,58 @@ The slack web api is good, but very raw.  What you need is a great ruby framewor
 * The Slack API is abstracted into easy ruby methods that take a block
 * Ruby is better than javascript
 
+## Quick Reference (Getting Started information is below):
+
+### Events
+Here are events that you may wish to listen for (put inside your `add_callbacks(slack_connection)` method in your `Bot` subclass:
+
+    class ExampleBot < SlackbotFrd::Bot
+        def add_callbacks(slack_connection)
+
+            # Pass a block that handles your response
+            slack_connection.on_connected do
+            slack_connection.on_close do
+            slack_connection.on_message do |user:, channel:, timestamp:|
+            slack_connection.on_channel_joined() do |user:, channel:|
+            slack_connection.on_channel_left do |user:, channel:|
+
+        end
+    end
+
+### Responses
+
+Here are responses through the slack connection you may wish to use:
+
+    def add_callbacks(slack_connection)
+        slack_connection.on_message do |user:, channel:, timestamp:|
+
+            slack_connection.send_message(message:, channel:)
+            slack_connection.send_message(message:, channel:, username:, avatar_emoji:)
+            slack_connection.send_message(message:, channel:, username:, avatar_url:)
+
+            slack_connection.delete_message(channel:, timestamp:)
+            slack_connection.post_reaction(name:, channel:, timestamp:)
+            slack_connection.invite_user(user:, channel:)
+
+        end
+    end
+
+### Data retrieval
+
+Here are some handles through which you can get useful data:
+
+    def add_callbacks(slack_connection)
+        slack_connection.on_message do |user:, channel:, timestamp:|
+
+            slack_connection.user_in_channel(channel)
+            slack_connection.user_ids
+            slack_connection.user_names
+            slack_connection.channel_ids
+            slack_connection.channel_names
+
+        end
+    end
+
 ## Prestantious!  Eximious!  How do I start?
 
 ### Step 1
@@ -185,7 +237,7 @@ You can respond to events by sending messages through the slack_connection.  if 
 
     slack_connection.send_message(
       channel: channel,
-      messge: message,
+      message: message,
       username: username,
       avatar_emoji: avatar_emoji,  # specify either an emoji or a url, but not both
       avatar_url: avatar_url
@@ -198,6 +250,24 @@ Here are events that you may wish to listen for:
     on_message(user:, channel:, timestamp:)
     on_channel_joined(user:, channel:)
     on_channel_left(user:, channel:)
+
+And here are responses through the slack connection you may wish to use:
+
+    slack_connection.send_message(message:, channel:)
+    slack_connection.send_message(message:, channel:, username:, avatar_emoji:)
+    slack_connection.send_message(message:, channel:, username:, avatar_url:)
+
+    slack_connection.delete_message(channel:, timestamp:)
+    slack_connection.post_reaction(name:, channel:, timestamp:)
+    slack_connection.invite_user(user:, channel:)
+
+And here are some handles through which you can get useful data:
+
+    slack_connection.user_in_channel(channel)
+    slack_connection.user_ids
+    slack_connection.user_names
+    slack_connection.channel_ids
+    slack_connection.channel_names
 
 ## Directly calling slack methods
 
