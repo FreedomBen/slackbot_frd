@@ -17,7 +17,6 @@ The slack web api is good, but very raw.  What you need is a great ruby framewor
 * Ruby is better than javascript
 
 ## Quick Reference:
-## Prestantious!  Eximious!  How do I start?
 (Getting Started information can be found [below](#prestantious--eximious--how-do-i-start)):
 
 ### Events
