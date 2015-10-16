@@ -402,6 +402,10 @@ module SlackbotFrd
         im_channels_list = SlackbotFrd::SlackMethods::ImChannelsList.new(@token).connect
         @channel_id_to_name.merge!(im_channels_list.ids_to_names)
         @channel_name_to_id.merge!(im_channels_list.names_to_ids)
+
+        groups_list = SlackbotFrd::SlackMethods::GroupsList.new(@token).connect
+        @channel_id_to_name.merge!(groups_list.ids_to_names)
+        @channel_name_to_id.merge!(groups_list.names_to_ids)
       rescue SocketError => e
         log_and_add_to_error_file(socket_error_message(e))
       end
