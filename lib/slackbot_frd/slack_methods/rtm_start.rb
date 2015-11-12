@@ -24,7 +24,7 @@ module SlackbotFrd
 
       def wss_url
         #return "ERR" unless @response.has_key?("url")
-        @response["url"]
+        @response['url']
       end
     end
   end

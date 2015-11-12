@@ -16,15 +16,15 @@ end
 
 DEBUG = true
 
-PID_FILE_WATCHER = "/tmp/slackbot-frd-watcher.pid"
-PID_FILE_CONNECTION = "/tmp/slackbot-frd-connection.pid"
-BOT_LIST_FILE = "/tmp/slackbot-frd-bot-list.pid"
-ERROR_FILE = "/tmp/slackbot-frd.errors"
-DEFAULT_CONFIG_FILE = "slackbot-frd.conf"
-LOG_FILE = "slackbot-frd.log"
+PID_FILE_WATCHER = '/tmp/slackbot-frd-watcher.pid'
+PID_FILE_CONNECTION = '/tmp/slackbot-frd-connection.pid'
+BOT_LIST_FILE = '/tmp/slackbot-frd-bot-list.pid'
+ERROR_FILE = '/tmp/slackbot-frd.errors'
+DEFAULT_CONFIG_FILE = 'slackbot-frd.conf'
+LOG_FILE = 'slackbot-frd.log'
 
 class SlackbotFrdBin < Thor
-  desc "list", "List all bots"
+  desc 'list', 'List all bots'
   long_desc <<-LONGDESC
     list will print out all available bots
 
@@ -34,16 +34,16 @@ class SlackbotFrdBin < Thor
     # TODO
   end
 
-  desc "status", "Report status on daemon procs"
+  desc 'status', 'Report status on daemon procs'
   def status
     if running?(watcher_pid)
       puts "Daemon running as pid '#{watcher_pid}'".green
     else
-      puts "Daemon not running".red
+      puts 'Daemon not running'.red
     end
   end
 
-  desc "new <project-name>", "Generate a new slackbot_frd project"
+  desc 'new <project-name>', 'Generate a new slackbot_frd project'
   long_desc <<-LONGDESC
     new will generate a skeleton for a new slackbot_frd project
   LONGDESC
@@ -56,25 +56,25 @@ class SlackbotFrdBin < Thor
     Dir.mkdir(proj_name)
     Dir.chdir(proj_name)
     genconfig
-    File.write("Gemfile", <<-GEMFILE.strip_heredoc)
+    File.write('Gemfile', <<-GEMFILE.strip_heredoc)
       source "https://rubygems.org"
 
       gem "slackbot_frd"
     GEMFILE
-    Dir.mkdir("bots")
-    write_example_bot("bots/example_bot.rb")
-    Dir.mkdir("lib")
+    Dir.mkdir('bots')
+    write_example_bot('bots/example_bot.rb')
+    Dir.mkdir('lib')
 
     unless options[:nospec]
-      File.append("Gemfile", <<-GEMFILE.strip_heredoc)
+      File.append('Gemfile', <<-GEMFILE.strip_heredoc)
 
       gem "rspec", "~> 3.2"
       GEMFILE
-      Dir.mkdir("spec")
+      Dir.mkdir('spec')
     end
   end
 
-  desc "genconfig", "Generate a skeleton config file"
+  desc 'genconfig', 'Generate a skeleton config file'
   long_desc <<-LONGDESC
     genconfig will generate a skeleton config file that
     can be customized
@@ -93,7 +93,7 @@ class SlackbotFrdBin < Thor
     CONFIG_FILE_SKELETON
   end
 
-  desc "start [bot1] [bot2] [botx...]", "Start all specified bots, or all bots"
+  desc 'start [bot1] [bot2] [botx...]', 'Start all specified bots, or all bots'
   long_desc <<-LONGDESC
     start [bot1] [bot2] [botx...] will start the specified bots.
     If no bots are specified, all available bots will be run.
@@ -125,25 +125,25 @@ class SlackbotFrdBin < Thor
     $slackbotfrd_conf.freeze
 
     daemonize = false
-    daemonize = $slackbotfrd_conf["daemonize"] if $slackbotfrd_conf["daemonize"]
-    daemonize = ENV["SLACKBOT_FRD_DAEMONIZE"] if ENV["SLACKBOT_FRD_DAEMONIZE"]
+    daemonize = $slackbotfrd_conf['daemonize'] if $slackbotfrd_conf['daemonize']
+    daemonize = ENV['SLACKBOT_FRD_DAEMONIZE'] if ENV['SLACKBOT_FRD_DAEMONIZE']
     daemonize = options[:daemonize] if options[:daemonize]
 
     botdir = Dir.pwd
-    botdir = $slackbotfrd_conf["botdir"] if $slackbotfrd_conf["botdir"]
-    botdir = ENV["SLACKBOT_FRD_BOTDIR"] if ENV["SLACKBOT_FRD_BOTDIR"]
+    botdir = $slackbotfrd_conf['botdir'] if $slackbotfrd_conf['botdir']
+    botdir = ENV['SLACKBOT_FRD_BOTDIR'] if ENV['SLACKBOT_FRD_BOTDIR']
     botdir = options[:botdir] if options[:botdir]
     botdir = File.expand_path(botdir)
 
     SlackbotFrd::Log.logfile = "#{botdir}/#{LOG_FILE}"
-    SlackbotFrd::Log.logfile = $slackbotfrd_conf["log_file"] if $slackbotfrd_conf["log_file"]
-    SlackbotFrd::Log.logfile = ENV["SLACKBOT_FRD_LOG_FILE"] if ENV["SLACKBOT_FRD_LOG_FILE"]
-    SlackbotFrd::Log.logfile = options["log-file"] if options['log-file']
+    SlackbotFrd::Log.logfile = $slackbotfrd_conf['log_file'] if $slackbotfrd_conf['log_file']
+    SlackbotFrd::Log.logfile = ENV['SLACKBOT_FRD_LOG_FILE'] if ENV['SLACKBOT_FRD_LOG_FILE']
+    SlackbotFrd::Log.logfile = options['log-file'] if options['log-file']
 
     SlackbotFrd::Log.level = :info
-    SlackbotFrd::Log.level = $slackbotfrd_conf["log_level"] if $slackbotfrd_conf["log_level"]
-    SlackbotFrd::Log.level = ENV["SLACKBOT_FRD_LOG_LEVEL"] if ENV["SLACKBOT_FRD_LOG_LEVEL"]
-    SlackbotFrd::Log.level = options["log-level"] if options['log-level']
+    SlackbotFrd::Log.level = $slackbotfrd_conf['log_level'] if $slackbotfrd_conf['log_level']
+    SlackbotFrd::Log.level = ENV['SLACKBOT_FRD_LOG_LEVEL'] if ENV['SLACKBOT_FRD_LOG_LEVEL']
+    SlackbotFrd::Log.level = options['log-level'] if options['log-level']
 
     # If we got a number for log level that is valid, just use that
     if SlackbotFrd::Log.level =~ /\d+/ && SlackbotFrd::Log.levels.values.include?(SlackbotFrd::Log.level.to_i)
@@ -165,11 +165,11 @@ class SlackbotFrdBin < Thor
     SlackbotFrd::Log.warn("Logging to file '#{SlackbotFrd::Log.logfile}'")
     SlackbotFrd::Log.warn("Logging level set to '#{SlackbotFrd::Log.level}'")
 
-    token = $slackbotfrd_conf["token"]
-    token = ENV["SLACKBOT_FRD_TOKEN"] if ENV["SLACKBOT_FRD_TOKEN"]
+    token = $slackbotfrd_conf['token']
+    token = ENV['SLACKBOT_FRD_TOKEN'] if ENV['SLACKBOT_FRD_TOKEN']
     token = options[:token] if options[:token]
     unless token
-      SlackbotFrd::Log.error("No token found.  Cannot authenticate to Slack")
+      SlackbotFrd::Log.error('No token found.  Cannot authenticate to Slack')
       return
     end
 
@@ -180,7 +180,7 @@ class SlackbotFrdBin < Thor
     end
   end
 
-  desc "stop", "Stop all bots"
+  desc 'stop', 'Stop all bots'
   long_desc <<-LONGDESC
     stop will stop all bots
 
@@ -195,7 +195,7 @@ class SlackbotFrdBin < Thor
     delfile(ERROR_FILE)
   end
 
-  desc "bump", "Kill the bots, but not the watcher"
+  desc 'bump', 'Kill the bots, but not the watcher'
   long_desc <<-LONGDESC
     bump will kill the connection process, but not the watcher.
     this causes the watcher to restart the connection.  This
@@ -208,7 +208,7 @@ class SlackbotFrdBin < Thor
     kill_pid(connection_pid)
   end
 
-  desc "restart", "Stop all bots and restart them"
+  desc 'restart', 'Stop all bots and restart them'
   long_desc <<-LONGDESC
     restart will restart all bots
 

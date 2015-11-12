@@ -24,8 +24,8 @@ module SlackbotFrd
       end
 
       def members
-        if @response["channel"]
-          @response["channel"]["members"]
+        if @response['channel']
+          @response['channel']['members']
         else
           []
         end

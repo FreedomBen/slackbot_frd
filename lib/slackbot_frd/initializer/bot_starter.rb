@@ -17,11 +17,13 @@ class BotStarter
     bot_enabled = ->(bot) do
       enabled_bots.empty? ||
       enabled_bots.include?(bot) ||
-      enabled_bots.include?(bot.gsub("-", "_").camelize)
+      enabled_bots.include?(bot.gsub('-', '_').camelize)
     end
 
     # Create a new Connection to pass to the bot classes
-    slack_connection = SlackbotFrd::SlackConnection.new(token, errors_file)
+    slack_connection = SlackbotFrd::SlackConnection.new(
+      token: token, errors_file: errors_file, monitor_connection: true
+    )
 
     load_bot_files(botdir)
 
@@ -37,12 +39,12 @@ class BotStarter
     end
 
     if bots.count == 0
-      SlackbotFrd::Log.error("Not starting: no bots found")
-      File.append(errors_file, "Not starting: no bots found")
+      SlackbotFrd::Log.error('Not starting: no bots found')
+      File.append(errors_file, 'Not starting: no bots found')
     else
-      SlackbotFrd::Log.debug("Starting SlackConnection")
+      SlackbotFrd::Log.debug('Starting SlackConnection')
       slack_connection.start
-      SlackbotFrd::Log.debug("Connection closed")
+      SlackbotFrd::Log.debug('Connection closed')
     end
   end
 

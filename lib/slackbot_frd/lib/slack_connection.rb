@@ -22,15 +22,17 @@ module SlackbotFrd
     LOG_FILE = "#{APP_ROOT}/bp-slackbot.log"
     PID_FILE_NAME = "#{APP_ROOT}/bp-slackbot.pid"
 
+    attr_writer :restrict_actions_to_channels_joined
+
     attr_accessor :token
 
-    def initialize(token, errors_file)
-      unless token
-        log_and_add_to_error_file("No token passed to #{self.class}")
-      end
+    def initialize(token:, errors_file:, monitor_connection: true)
+      log_and_add_to_error_file("No token passed to #{self.class}") unless token
 
       @token = token
       @errors_file = errors_file
+      @monitor_connection = monitor_connection
+
       @event_id = 0
       @on_connected_callbacks = []
       @on_disconnected_callbacks = []
@@ -62,7 +64,7 @@ module SlackbotFrd
         end
 
         unless wss_url
-          log_and_add_to_error_file("No Real Time stream opened by slack.  Check for network connection and correct authentication token")
+          log_and_add_to_error_file('No Real Time stream opened by slack.  Check for network connection and correct authentication token')
           return
         end
         @ws = Faye::WebSocket::Client.new(wss_url)
@@ -72,7 +74,7 @@ module SlackbotFrd
         @ws.on(:message) { |event| process_message_received(event) }
 
         # Clean up our pid file
-        @ws.on(:close) { |event| File.delete(PID_FILE_NAME) }
+        @ws.on(:close) { |_event| File.delete(PID_FILE_NAME) }
       end
 
       SlackbotFrd::Log.debug("#{self.class}: event machine started")
@@ -93,13 +95,21 @@ module SlackbotFrd
 
     def on_message(user: :any, channel: :any, &block)
       wrap_user_or_channel_lookup_on_callback('on_message', user, channel) do
-        @on_message_callbacks.add(user: user_name_to_id(user), channel: channel_name_to_id(channel), callback: block)
+        @on_message_callbacks.add(
+          user: user_name_to_id(user),
+          channel: channel_name_to_id(channel),
+          callback: block
+        )
       end
     end
 
     def on_channel_left(user: :any, channel: :any, &block)
       wrap_user_or_channel_lookup_on_callback('on_message_channel_left', user, channel) do
-        @on_channel_left_callbacks.add(user: user_name_to_id(user), channel: channel_name_to_id(channel), callback: block)
+        @on_channel_left_callbacks.add(
+          user: user_name_to_id(user),
+          channel: channel_name_to_id(channel),
+          callback: block
+        )
       end
     end
 
@@ -138,7 +148,9 @@ module SlackbotFrd
     end
 
     def post_reaction(name:, channel: nil, timestamp: nil)
-      SlackbotFrd::Log.debug("#{self.class}: Posting reaction '#{name}' to channel '#{channel}' with timestamp '#{timestamp}'")
+      SlackbotFrd::Log.debug(
+        "#{self.class}: Posting reaction '#{name}' to channel '#{channel}' with timestamp '#{timestamp}'"
+      )
 
       resp = SlackbotFrd::SlackMethods::ReactionsAdd.add(
         token: @token,
@@ -150,24 +162,25 @@ module SlackbotFrd
       SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
     end
 
-    def invite_user(user: user, channel: channel)
-      SlackbotFrd::Log.debug("#{self.class}: Inviting user '#{user}' to channel '#{channel}'")
+    def invite_user(user:, channel:)
+      SlackbotFrd::Log.debug(
+        "#{self.class}: Inviting user '#{user}' to channel '#{channel}'"
+      )
 
       resp = SlackbotFrd::SlackMethods::ChannelsInvite.invite(
         token: @token,
         user: user_name_to_id(user),
-        channel: channel_name_to_id(channel),
+        channel: channel_name_to_id(channel)
       )
 
       SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
     end
 
-    def restrict_actions_to_channels_joined(value = true)
-      @restrict_actions_to_channels_joined = value
-    end
-
     def users_in_channel(channel)
-      a = SlackMethods::ChannelsInfo.members(token: @token, channel: channel_name_to_id(channel))
+      a = SlackMethods::ChannelsInfo.members(
+        token: @token,
+        channel: channel_name_to_id(channel)
+      )
       a.map{ |id| user_id_to_name(id) }
     end
 
@@ -189,52 +202,70 @@ module SlackbotFrd
 
     def user_id_to_name(user_id)
       return user_id if user_id == :any || user_id == :bot
-      unless @user_id_to_name && @user_id_to_name.has_key?(user_id)
+      unless @user_id_to_name && @user_id_to_name.key?(user_id)
         refresh_user_info
       end
-      SlackbotFrd::Log.warn("#{self.class}: User id '#{user_id}' not found") unless @user_id_to_name.include?(user_id)
+      unless @user_id_to_name.include?(user_id)
+        SlackbotFrd::Log.warn("#{self.class}: User id '#{user_id}' not found")
+      end
       @user_id_to_name[user_id]
     end
 
     def user_name_to_id(user_name)
       return user_name if user_name == :any || user_name == :bot
-      unless @user_name_to_id && @user_name_to_id.has_key?(user_name)
+      unless @user_name_to_id && @user_name_to_id.key?(user_name)
         refresh_user_info
       end
-      SlackbotFrd::Log.warn("#{self.class}: User name '#{user_name}' not found") unless @user_name_to_id.include?(user_name)
+      unless @user_name_to_id.include?(user_name)
+        SlackbotFrd::Log.warn(
+          "#{self.class}: User name '#{user_name}' not found"
+        )
+      end
       @user_name_to_id[user_name]
     end
 
     def channel_id_to_name(channel_id)
-      unless @channel_id_to_name && @channel_id_to_name.has_key?(channel_id)
+      unless @channel_id_to_name && @channel_id_to_name.key?(channel_id)
         refresh_channel_info
       end
-      SlackbotFrd::Log.warn("#{self.class}: Channel id '#{channel_id}' not found") unless @channel_id_to_name.include?(channel_id)
+      unless @channel_id_to_name.include?(channel_id)
+        SlackbotFrd::Log.warn(
+          "#{self.class}: Channel id '#{channel_id}' not found"
+        )
+      end
       @channel_id_to_name[channel_id]
     end
 
     def channel_name_to_id(channel_name)
       return channel_name if channel_name == :any
       nc = normalize_channel_name(channel_name)
-      unless @channel_name_to_id && @channel_name_to_id.has_key?(nc)
+      unless @channel_name_to_id && @channel_name_to_id.key?(nc)
         refresh_channel_info
       end
-      SlackbotFrd::Log.warn("#{self.class}: Channel name '#{nc}' not found") unless @channel_name_to_id.include?(nc)
+      unless @channel_name_to_id.include?(nc)
+        SlackbotFrd::Log.warn(
+          "#{self.class}: Channel name '#{nc}' not found"
+        )
+      end
       @channel_name_to_id[nc]
     end
 
     private
-    def send_message_as_user(channel: channel, message: message)
+    def send_message_as_user(channel:, message:)
       unless @ws
-        log_and_add_to_error_file("Cannot send message '#{message}' as user to channel '#{channel}' because not connected to wss stream")
+        log_and_add_to_error_file(
+          "Cannot send message '#{message}' as user to channel '#{channel}' because not connected to wss stream"
+        )
       end
 
-      SlackbotFrd::Log.debug("#{self.class}: Sending message '#{message}' as user to channel '#{channel}'")
+      SlackbotFrd::Log.debug(
+        "#{self.class}: Sending message '#{message}' as user to channel '#{channel}'"
+      )
 
       begin
         resp = @ws.send({
           id: event_id,
-          type: "message",
+          type: 'message',
           channel: channel_name_to_id(channel),
           text: message
         }.to_json)
@@ -247,7 +278,9 @@ module SlackbotFrd
 
     private
     def send_message_as_bot(channel:, message:, username:, avatar_emoji: nil, avatar_url: nil)
-      SlackbotFrd::Log.debug("#{self.class}: Sending message '#{message}' as bot user '#{username}' to channel '#{channel}'")
+      SlackbotFrd::Log.debug(
+        "#{self.class}: Sending message '#{message}' as bot user '#{username}' to channel '#{channel}'"
+      )
 
       resp = SlackbotFrd::SlackMethods::ChatPostMessage.postMessage(
         token: @token,
@@ -265,10 +298,14 @@ module SlackbotFrd
     def wrap_user_or_channel_lookup_on_callback(callback_name, user, channel)
       begin
         return yield
-      rescue SlackbotFrd::InvalidChannelError => e
-        log_and_add_to_error_file("Unable to add #{callback_name} callback for channel '#{channel}'.  Lookup of channel name to ID failed.  Check network connection, and ensure channel exists and is accessible")
-      rescue SlackbotFrd::InvalidUserError => e
-        log_and_add_to_error_file("Unable to add #{callback_name} callback for user '#{user}'.  Lookup of user name to ID failed.  Check network connection and ensure user exists")
+      rescue SlackbotFrd::InvalidChannelError => _e
+        log_and_add_to_error_file(
+          "Unable to add #{callback_name} callback for channel '#{channel}'.  Lookup of channel name to ID failed.  Check network connection, and ensure channel exists and is accessible"
+        )
+      rescue SlackbotFrd::InvalidUserError => _e
+        log_and_add_to_error_file(
+          "Unable to add #{callback_name} callback for user '#{user}'.  Lookup of user name to ID failed.  Check network connection and ensure user exists"
+        )
       end
     end
 
@@ -282,44 +319,48 @@ module SlackbotFrd
     def process_message_received(event)
       message = JSON.parse(event.data)
       SlackbotFrd::Log.verbose("#{self.class}: Message received: #{message}")
-      if message["type"] == "message"
-        if message["subtype"] == "channel_join"
-          process_join_message(message)
-        elsif message["subtype"] == "channel_leave"
-          process_leave_message(message)
-        elsif message["subtype"] == "file_share"
-          process_file_share(message)
-        else
-          process_chat_message(message)
-        end
+
+      return unless message['type'] == 'message'
+      if message['subtype'] == 'channel_join'
+        process_join_message(message)
+      elsif message['subtype'] == 'channel_leave'
+        process_leave_message(message)
+      elsif message['subtype'] == 'file_share'
+        process_file_share(message)
+      else
+        process_chat_message(message)
       end
     end
 
     private
     def process_file_share(message)
-      SlackbotFrd::Log.verbose("#{self.class}: Processing file share: #{message}")
-      SlackbotFrd::Log.debug("#{self.class}: Not processing file share because it is not implemented:")
+      SlackbotFrd::Log.verbose(
+        "#{self.class}: Processing file share: #{message}"
+      )
+      SlackbotFrd::Log.debug(
+        "#{self.class}: Not processing file share because it is not implemented:"
+      )
     end
 
     private
     def extract_user(message)
-      user = message["user"]
-      user = :bot if message["subtype"] == "bot_message"
-      user = message["message"]["user"] if !user && message["message"]
+      user = message['user']
+      user = :bot if message['subtype'] == 'bot_message'
+      user = message['message']['user'] if !user && message['message']
       user
     end
 
     private
     def extract_ts(message)
-      ts = message["ts"]
-      ts = message["message"]["ts"] if message["message"] && message["message"]["ts"]
+      ts = message['ts']
+      ts = message['message']['ts'] if message['message'] && message['message']['ts']
       ts
     end
 
     private
     def extract_text(message)
-      text = message["text"]
-      text = message["message"]["text"] if !text && message["message"]
+      text = message['text']
+      text = message['message']['text'] if !text && message['message']
       text
     end
 
@@ -328,7 +369,7 @@ module SlackbotFrd
       SlackbotFrd::Log.verbose("#{self.class}: Processing chat message: #{message}")
 
       user = extract_user(message)
-      channel = message["channel"]
+      channel = message['channel']
       text = extract_text(message)
       ts = extract_ts(message)
 
@@ -362,9 +403,9 @@ module SlackbotFrd
     private
     def process_join_message(message)
       SlackbotFrd::Log.verbose("#{self.class}: Processing join message: #{message}")
-      user = message["user"]
-      user = :bot if message["subtype"] == "bot_message"
-      channel = message["channel"]
+      user = message['user']
+      user = :bot if message['subtype'] == 'bot_message'
+      channel = message['channel']
       @on_channel_joined_callbacks.where_include_all(user: user, channel: channel).each do |callback|
         callback.call(user: user_id_to_name(user), channel: channel_id_to_name(channel))
       end
@@ -373,9 +414,9 @@ module SlackbotFrd
     private
     def process_leave_message(message)
       SlackbotFrd::Log.verbose("#{self.class}: Processing leave message: #{message}")
-      user = message["user"]
-      user = :bot if message["subtype"] == "bot_message"
-      channel = message["channel"]
+      user = message['user']
+      user = :bot if message['subtype'] == 'bot_message'
+      channel = message['channel']
       @on_channel_left_callbacks.where_include_all(user: user, channel: channel).each do |callback|
         callback.call(user: user_id_to_name(user), channel: channel_id_to_name(channel))
       end

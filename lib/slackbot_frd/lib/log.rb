@@ -48,7 +48,7 @@ module SlackbotFrd
       om = "#{DateTime.now.strftime('%Y-%m-%e %H:%M:%S.%L %z')}: [#{loglevel}]: #{message}\n"
       print om.send(color)
       begin
-        raise StandardError.new("No log file specified. (Set with SlackbotFrd::Log.logfile=)") unless @logfile
+        raise StandardError.new('No log file specified. (Set with SlackbotFrd::Log.logfile=)') unless @logfile
         File.open(@logfile, 'a') do |f|
           f.write(om)
         end

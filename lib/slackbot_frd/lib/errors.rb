@@ -5,7 +5,7 @@ module SlackbotFrd
       if message
         super(message)
       else
-        super("An API token is required for authenticating to the Slack API")
+        super('An API token is required for authenticating to the Slack API')
       end
     end
   end

@@ -20,16 +20,16 @@ module SlackbotFrd
 
       def ids_to_names
         retval = {}
-        @response["members"].each do |user|
-          retval[user["id"]] = user["name"]
+        @response['members'].each do |user|
+          retval[user['id']] = user['name']
         end
         retval
       end
 
       def names_to_ids
         retval = {}
-        @response["members"].each do |user|
-          retval[user["name"]] = user["id"]
+        @response['members'].each do |user|
+          retval[user['name']] = user['id']
         end
         retval
       end

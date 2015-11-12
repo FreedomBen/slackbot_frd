@@ -22,8 +22,8 @@ RSpec.describe UserChannelCallbacks do
     let("c#{i}".to_sym) { "channel#{i}" }
   end
 
-  context "properly return callbacks" do
-    it "should return for :any, :any" do
+  context 'properly return callbacks' do
+    it 'should return for :any, :any' do
       cjc.add(:any, :any, call1)
       cjc.add(:any, :any, call2)
       expect(cjc.where(:any, :any).count).to be 2
@@ -35,7 +35,7 @@ RSpec.describe UserChannelCallbacks do
       expect(cjc.where_include_all(u1, c1).count).to be 2
     end
 
-    it "should return the :any callbacks for specific users" do
+    it 'should return the :any callbacks for specific users' do
       cjc.add(:any, :any, call1)
       cjc.add(:any, :any, call2)
       cjc.add(u1, :any, call3)
