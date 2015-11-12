@@ -21,8 +21,7 @@ module SlackbotFrd
     FILE_DIR = File.dirname(FILE_PATH)
     LOG_FILE = "#{APP_ROOT}/bp-slackbot.log"
     PID_FILE_NAME = "#{APP_ROOT}/bp-slackbot.pid"
-
-    attr_writer :restrict_actions_to_channels_joined
+    PING_INTERVAL_SECONDS = 5
 
     attr_accessor :token
 
@@ -46,7 +45,8 @@ module SlackbotFrd
       @channel_id_to_name = {}
       @channel_name_to_id = {}
 
-      restrict_actions_to_channels_joined
+      @pong_received = true
+
       SlackbotFrd::Log.debug("Done initializing #{self.class}")
     end
 
@@ -64,7 +64,9 @@ module SlackbotFrd
         end
 
         unless wss_url
-          log_and_add_to_error_file('No Real Time stream opened by slack.  Check for network connection and correct authentication token')
+          log_and_add_to_error_file(
+            'No Real Time stream opened by slack.  Check for network connection and correct authentication token'
+          )
           return
         end
         @ws = Faye::WebSocket::Client.new(wss_url)
@@ -75,9 +77,14 @@ module SlackbotFrd
 
         # Clean up our pid file
         @ws.on(:close) { |_event| File.delete(PID_FILE_NAME) }
+
+        # This should ensure that we get a pong back at least every
+        # PING_INTERVAL_SECONDS, otherwise we die because our
+        # connection is probably toast
+        EM.add_periodic_timer(PING_INTERVAL_SECONDS) { check_ping }
       end
 
-      SlackbotFrd::Log.debug("#{self.class}: event machine started")
+      SlackbotFrd::Log.info("#{self.class}: event machine loop terminated")
     end
 
     def event_id
@@ -461,6 +468,30 @@ module SlackbotFrd
     def log_and_add_to_error_file(err)
       SlackbotFrd::Log.error(err)
       File.append(@errors_file, "#{err}\n")
+    end
+
+    private
+    def check_ping
+      @pong_received ? send_ping : die_from_no_pong
+    end
+
+    private
+    def send_ping
+      SlackbotFrd::Log.verbose('Sending ping')
+      @pong_received = false
+      @ws.ping do
+        @pong_received = true
+        SlackbotFrd::Log.verbose('Pong received')
+      end
+    end
+
+    private
+    def die_from_no_pong
+      SlackbotFrd::Log.error(
+        'Pong not received after 5 seconds.  Stopping EM loop...'
+      )
+      @ws.close
+      EM.stop_event_loop
     end
   end
 end
