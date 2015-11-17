@@ -6,14 +6,15 @@ The slack web api is good, but very raw.  What you need is a great ruby framewor
 
 ## Why use this framework
 
-* You get to use the RTM API for free - no bothering with incoming/outgoing hooks
-* Writing one or more bots is trivial
-* You don't have to worry about using event machine and setting up the real time stream
+* This makes writing one or more bots trivial
+* You get to use the Slack Real-Time Messaging (RTM) API for free - no bothering with setting up and maintaining an active wss connection
+    * The connection to slack is automatically initialized and ping/ponged for you
+    * If the connection goes down, it is automatically brought back up
 * Running your bots continuously is handled for you
     * This means you can run your bots as a system service
     * When the connection goes down, it is brought back up for you
 * Extensive logging is built in
-* The Slack API is abstracted into easy ruby methods that take a block
+* The Slack API is abstracted into easy ruby methods that take blocks
 * Ruby is better than javascript
 
 ## Quick Reference:
@@ -218,7 +219,7 @@ The following configuration options are available.  Where applicable, defaults a
 
 ## Subclassing Bot
 
-In your subclass of `SlackbotFrd::Bot`, you will need to override the `add_callbacks` method which takes one argument, commonly call `slack_connection` (or `sc` for short).
+In your subclass of `SlackbotFrd::Bot`, you will need to override the `add_callbacks` method which takes one argument, commonly called `slack_connection` (or `sc` for short).
 
     def add_callbacks(slack_connection)
 
@@ -318,9 +319,15 @@ You can post a chat message that appears to come from a "bot," using only your u
     )
     ```
 
+## Sample Projects
+
+Sample project number one is [simple_rafflebot](https://github.com/FreedomBen/simple_rafflebot), a trivial "Raffle Bot" that responds to any message that starts with "rafflebot" by getting a list of users in the channel and randomly picking a "winner" from the list.  You can find it here:  https://github.com/FreedomBen/simple_rafflebot
+
+Sample project number two is [rafflebot](https://github.com/FreedomBen/rafflebot), which expands on simple_rafflebothe by adding some nice features.  This project includes a sqlite database to persist data.
+
 ## How do I set up incoming/outgoing webhooks with this?
 
-This framework uses the Real-time Messaging API from slack, which is much more powerful than incoming/outgoing webhooks (which are quite simple).  If you want to use incoming/outgoing webhooks, I suggest either rails or sinatra.  Note that in order to set up hooks, you will need to have admin powers or be granted that permission by an admin.
+This framework uses the Real-time Messaging API from slack, which is much more powerful than incoming/outgoing webhooks, and require less configuration.  If you want to use incoming/outgoing webhooks, I suggest either rails or sinatra.  Note that in order to set up hooks, you will need to have admin powers or be granted that permission by an admin.
 
 ## Bugs, Features, and Contributions
 
