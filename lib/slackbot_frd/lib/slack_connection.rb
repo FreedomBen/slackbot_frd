@@ -128,17 +128,29 @@ module SlackbotFrd
       end
     end
 
-    def send_message(channel:, message:, username: nil, avatar_emoji: nil, avatar_url: nil)
+    def send_im(user:, message:, username: nil, avatar_emoji: nil, avatar_url: nil)
+      send_message(
+        channel: im_channel_for_user(user),
+        message: message,
+        username: username,
+        avatar_emoji: avatar_emoji,
+        avatar_url: avatar_url,
+        channel_is_id: true
+      )
+    end
+
+    def send_message(channel:, message:, username: nil, avatar_emoji: nil, avatar_url: nil, channel_is_id: false)
       if username && (avatar_emoji || avatar_url)
         send_message_as_bot(
           channel: channel,
           message: message,
           username: username,
           avatar_emoji: avatar_emoji,
-          avatar_url: avatar_url
+          avatar_url: avatar_url,
+          channel_id_id: channel_is_id
         )
       else
-        send_message_as_user(channel: channel, message: message)
+        send_message_as_user(channel: channel, message: message, channel_is_id: channel_is_id)
       end
     end
 
@@ -181,6 +193,21 @@ module SlackbotFrd
       )
 
       SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
+    end
+
+    def im_channel_for_user(user:)
+      SlackbotFrd::Log.debug(
+        "#{self.class}: Opening or retrieving IM channel for user '#{user}'"
+      )
+
+      resp = JSON.parse(SlackbotFrd::SlackMethods::ImOpen.openChannel(
+        token: @token,
+        user: user_name_to_id(user)
+      ))
+
+      SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
+      return resp["channel"]["id"] if resp["channel"]
+      resp
     end
 
     def users_in_channel(channel)
@@ -258,12 +285,14 @@ module SlackbotFrd
     end
 
     private
-    def send_message_as_user(channel:, message:)
+    def send_message_as_user(channel:, message:, channel_is_id: false)
       unless @ws
         log_and_add_to_error_file(
           "Cannot send message '#{message}' as user to channel '#{channel}' because not connected to wss stream"
         )
       end
+
+      channel_id = channel_is_id ? channel : channel_name_to_id(channel)
 
       SlackbotFrd::Log.debug(
         "#{self.class}: Sending message '#{message}' as user to channel '#{channel}'"
@@ -273,7 +302,7 @@ module SlackbotFrd
         resp = @ws.send({
           id: event_id,
           type: 'message',
-          channel: channel_name_to_id(channel),
+          channel: channel_id,
           text: message
         }.to_json)
 
@@ -284,14 +313,16 @@ module SlackbotFrd
     end
 
     private
-    def send_message_as_bot(channel:, message:, username:, avatar_emoji: nil, avatar_url: nil)
+    def send_message_as_bot(channel:, message:, username:, avatar_emoji: nil, avatar_url: nil, channel_is_id: false)
       SlackbotFrd::Log.debug(
         "#{self.class}: Sending message '#{message}' as bot user '#{username}' to channel '#{channel}'"
       )
 
+      channel_id = channel_is_id ? channel : channel_name_to_id(channel)
+
       resp = SlackbotFrd::SlackMethods::ChatPostMessage.postMessage(
         token: @token,
-        channel: channel_name_to_id(channel),
+        channel: channel_id,
         message: message,
         username: username,
         avatar_emoji: avatar_emoji,
