@@ -218,6 +218,10 @@ module SlackbotFrd
       a.map{ |id| user_id_to_name(id) }
     end
 
+    def num_users_in_channel(channel)
+      users_in_channel(channel).count
+    end
+
     def user_ids(_force_refresh = false)
       @user_id_to_name.keys
     end
