@@ -139,18 +139,19 @@ module SlackbotFrd
       )
     end
 
-    def send_message(channel:, message:, username: nil, avatar_emoji: nil, avatar_url: nil, channel_is_id: false)
-      if username && (avatar_emoji || avatar_url)
+    def send_message(channel:, message:, username: nil, avatar_emoji: nil, avatar_url: nil, channel_is_id: false, parse: 'full')
+      if (username && (avatar_emoji || avatar_url)) || parse != 'full'
         send_message_as_bot(
           channel: channel,
           message: message,
           username: username,
           avatar_emoji: avatar_emoji,
           avatar_url: avatar_url,
-          channel_id_id: channel_is_id
+          channel_is_id: channel_is_id,
+          parse: parse
         )
       else
-        send_message_as_user(channel: channel, message: message, channel_is_id: channel_is_id)
+        send_message_as_user(channel: channel, message: message, channel_is_id: channel_is_id, parse: parse)
       end
     end
 
@@ -317,7 +318,7 @@ module SlackbotFrd
     end
 
     private
-    def send_message_as_bot(channel:, message:, username:, avatar_emoji: nil, avatar_url: nil, channel_is_id: false)
+    def send_message_as_bot(channel:, message:, username:, avatar_emoji: nil, avatar_url: nil, channel_is_id: false, parse: 'full')
       SlackbotFrd::Log.debug(
         "#{self.class}: Sending message '#{message}' as bot user '#{username}' to channel '#{channel}'"
       )
@@ -330,7 +331,8 @@ module SlackbotFrd
         message: message,
         username: username,
         avatar_emoji: avatar_emoji,
-        avatar_url: avatar_url
+        avatar_url: avatar_url,
+        parse: parse
       )
 
       SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
@@ -428,7 +430,7 @@ module SlackbotFrd
       @on_message_callbacks.where_include_all(user: user, channel: channel).each do |callback|
         # instance_exec allows the user to call send_message and send_message_as_user
         # without prefixing like this: slack_connection.send_message()
-        #  
+        #
         # However, it makes calling functions defined in the class not work, so
         # for now we aren't going to do it
         #
