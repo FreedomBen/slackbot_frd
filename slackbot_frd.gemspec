@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'slackbot_frd'
-  s.version     = '0.2.3'
+  s.version     = '0.2.4'
   s.date        = '2015-12-14'
   s.summary     = 'slackbot_frd provides a dirt-simple framework ' \
     'for implementing one or more slack bots'
