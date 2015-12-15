@@ -147,7 +147,7 @@ module SlackbotFrd
           username: username,
           avatar_emoji: avatar_emoji,
           avatar_url: avatar_url,
-          channel_id_id: channel_is_id
+          channel_is_id: channel_is_id
         )
       else
         send_message_as_user(channel: channel, message: message, channel_is_id: channel_is_id)
