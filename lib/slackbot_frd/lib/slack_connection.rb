@@ -151,7 +151,7 @@ module SlackbotFrd
           parse: parse
         )
       else
-        send_message_as_user(channel: channel, message: message, channel_is_id: channel_is_id, parse: parse)
+        send_message_as_user(channel: channel, message: message, channel_is_id: channel_is_id)
       end
     end
 
