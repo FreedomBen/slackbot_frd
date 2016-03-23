@@ -9,7 +9,11 @@ module SlackbotFrd
 
       attr_reader :response
 
-      def initialize(token, user_id)
+      def self.info(token:, user_id:)
+        UsersInfo.new(token: token, user_id: user_id).connect.info
+      end
+
+      def initialize(token:, user_id:)
         @token = token
         @user_id = user_id
       end
@@ -17,6 +21,10 @@ module SlackbotFrd
       def connect
         @response = JSON.parse(self.class.post('', :body => { token: @token, user: @user_id } ).body)
         self
+      end
+
+      def info
+        @response["user"]
       end
     end
   end

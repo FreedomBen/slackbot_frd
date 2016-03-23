@@ -289,6 +289,13 @@ module SlackbotFrd
       @channel_name_to_id[nc]
     end
 
+    def user_info(username)
+      resp = SlackbotFrd::SlackMethods::UsersInfo.info(
+        token: @token,
+        user_id: user_name_to_id(username)
+      )
+    end
+
     private
     def send_message_as_user(channel:, message:, channel_is_id: false)
       unless @ws
