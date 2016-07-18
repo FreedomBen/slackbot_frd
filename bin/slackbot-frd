@@ -120,8 +120,7 @@ class SlackbotFrdBin < Thor
 
     config_file = options['config-file']
     config_file = config_file_location unless config_file
-    $slackbotfrd_conf = config_file_json(config_file) if config_file
-    $slackbotfrd_conf ||= {}
+    $slackbotfrd_conf = build_slackbotfrd_conf(config_file)
     $slackbotfrd_conf.freeze
 
     daemonize = false
@@ -345,6 +344,37 @@ class SlackbotFrdBin < Thor
       end
     EXAMPLE_BOT
   end
+
+  private
+  def slackbotfrd_conf_key_to_keys(key)
+    ["SLACKBOT_FRD_#{key.upcase}", key.upcase]
+  end
+
+  private
+  def build_slackbotfrd_conf(config_file)
+    slackbotfrd_conf = config_file_json(config_file) if config_file
+    slackbotfrd_conf ||= {}
+    slackbotfrd_conf.keys.inject(slackbotfrd_conf) do |acc, key|
+      slackbotfrd_conf_key_to_keys(key).each do |k|
+        acc[k] = acc[key]
+      end
+      acc
+    end
+    # Copy env vars into the config so they can be used easily
+    ENV.keys.inject(slackbotfrd_conf) do |acc, key|
+      if key =~ /^SLACKBOT_FRD/i
+        acc[key] = ENV[key]
+        acc[key.downcase] = ENV[key]
+        acc[key.gsub(/SLACKBOT_FRD_?/i, '').downcase] = ENV[key]
+      end
+      acc
+    end
+    slackbotfrd_conf
+  end
 end
 
-SlackbotFrdBin.start(ARGV)
+if !ARGV.empty? && %w[-v --version].include?(ARGV.first)
+  puts "SlackbotFrd - Version: #{SlackbotFrd::VERSION}"
+else
+  SlackbotFrdBin.start(ARGV)
+end
