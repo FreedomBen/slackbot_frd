@@ -8,6 +8,7 @@ require 'active_support/core_ext/string'
 require 'slackbot_frd/initializer/bot_starter'
 require 'slackbot_frd/lib/slack_connection'
 require 'slackbot_frd/lib/bot'
+require 'slackbot_frd/lib/version'
 
 begin
   require 'byebug'
@@ -217,6 +218,12 @@ class SlackbotFrdBin < Thor
     stop
     start(set_bots)
   end
+
+  desc 'version', 'Check current installed version of slackbot_frd'
+  def version
+    puts "SlackbotFrd - Version: #{SlackbotFrd::VERSION}"
+  end
+
   private
   def config_file_location
     "#{Dir.pwd}/#{DEFAULT_CONFIG_FILE}"
