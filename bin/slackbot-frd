@@ -127,25 +127,25 @@ class SlackbotFrdBin < Thor
     daemonize = false
     daemonize = $slackbotfrd_conf['daemonize'] if $slackbotfrd_conf['daemonize']
     if ENV['SLACKBOT_FRD_DAEMONIZE']
-      daemonize = ENV['SLACKBOT_FRD_DAEMONIZE']
+      daemonize = ENV['SLACKBOT_FRD_DAEMONIZE'].chomp
       daemonize = daemonize == 'true' || daemonize == '1'
     end
     daemonize = options[:daemonize] if options[:daemonize]
 
     botdir = Dir.pwd
     botdir = $slackbotfrd_conf['botdir'] if $slackbotfrd_conf['botdir']
-    botdir = ENV['SLACKBOT_FRD_BOTDIR'] if ENV['SLACKBOT_FRD_BOTDIR']
+    botdir = ENV['SLACKBOT_FRD_BOTDIR'].chomp if ENV['SLACKBOT_FRD_BOTDIR']
     botdir = options[:botdir] if options[:botdir]
     botdir = File.expand_path(botdir)
 
     SlackbotFrd::Log.logfile = "#{botdir}/#{LOG_FILE}"
     SlackbotFrd::Log.logfile = $slackbotfrd_conf['log_file'] if $slackbotfrd_conf['log_file']
-    SlackbotFrd::Log.logfile = ENV['SLACKBOT_FRD_LOG_FILE'] if ENV['SLACKBOT_FRD_LOG_FILE']
+    SlackbotFrd::Log.logfile = ENV['SLACKBOT_FRD_LOG_FILE'].chomp if ENV['SLACKBOT_FRD_LOG_FILE']
     SlackbotFrd::Log.logfile = options['log-file'] if options['log-file']
 
     SlackbotFrd::Log.level = :info
     SlackbotFrd::Log.level = $slackbotfrd_conf['log_level'] if $slackbotfrd_conf['log_level']
-    SlackbotFrd::Log.level = ENV['SLACKBOT_FRD_LOG_LEVEL'] if ENV['SLACKBOT_FRD_LOG_LEVEL']
+    SlackbotFrd::Log.level = ENV['SLACKBOT_FRD_LOG_LEVEL'].chomp if ENV['SLACKBOT_FRD_LOG_LEVEL']
     SlackbotFrd::Log.level = options['log-level'] if options['log-level']
 
     # If we got a number for log level that is valid, just use that
@@ -366,20 +366,26 @@ class SlackbotFrdBin < Thor
     slackbotfrd_conf ||= {}
     slackbotfrd_conf.keys.inject(slackbotfrd_conf) do |acc, key|
       slackbotfrd_conf_key_to_keys(key).each do |k|
-        acc[k] = acc[key]
+        acc[k] = chomp_if_string(acc[key])
       end
       acc
     end
     # Copy env vars into the config so they can be used easily
     ENV.keys.inject(slackbotfrd_conf) do |acc, key|
       if key =~ /^SLACKBOT_FRD/i
-        acc[key] = ENV[key]
-        acc[key.downcase] = ENV[key]
-        acc[key.gsub(/SLACKBOT_FRD_?/i, '').downcase] = ENV[key]
+        acc[key] = chomp_if_string(ENV[key])
+        acc[key.downcase] = chomp_if_string(ENV[key])
+        acc[key.gsub(/SLACKBOT_FRD_?/i, '').downcase] = chomp_if_string(ENV[key])
       end
       acc
     end
     slackbotfrd_conf
+  end
+
+  private
+  def chomp_if_string(str)
+    return str.chomp if str.is_a?(String)
+    str
   end
 end
 
