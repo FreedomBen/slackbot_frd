@@ -126,7 +126,10 @@ class SlackbotFrdBin < Thor
 
     daemonize = false
     daemonize = $slackbotfrd_conf['daemonize'] if $slackbotfrd_conf['daemonize']
-    daemonize = ENV['SLACKBOT_FRD_DAEMONIZE'] if ENV['SLACKBOT_FRD_DAEMONIZE']
+    if ENV['SLACKBOT_FRD_DAEMONIZE']
+      daemonize = ENV['SLACKBOT_FRD_DAEMONIZE']
+      daemonize = daemonize == 'true' || daemonize == '1'
+    end
     daemonize = options[:daemonize] if options[:daemonize]
 
     botdir = Dir.pwd
