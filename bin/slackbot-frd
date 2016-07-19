@@ -169,7 +169,7 @@ class SlackbotFrdBin < Thor
     SlackbotFrd::Log.warn("Logging level set to '#{SlackbotFrd::Log.level}'")
 
     token = $slackbotfrd_conf['token']
-    token = ENV['SLACKBOT_FRD_TOKEN'] if ENV['SLACKBOT_FRD_TOKEN']
+    token = ENV['SLACKBOT_FRD_TOKEN'].chomp if ENV['SLACKBOT_FRD_TOKEN']
     token = options[:token] if options[:token]
     unless token
       SlackbotFrd::Log.error('No token found.  Cannot authenticate to Slack')
