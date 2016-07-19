@@ -20,6 +20,7 @@ module SlackbotFrd
 
       def connect
         @response = JSON.parse(self.class.post('', :body => { token: @token, user: @user_id } ).body)
+        ValidateSlack.response(@response)
         self
       end
 

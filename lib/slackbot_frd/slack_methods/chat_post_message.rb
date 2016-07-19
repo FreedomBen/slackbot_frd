@@ -52,6 +52,7 @@ module SlackbotFrd
         body.merge!(parse: @parse) if @parse
 
         @response = self.class.post('', :body => body)
+        ValidateSlack.response(@response)
         @response
       end
     end

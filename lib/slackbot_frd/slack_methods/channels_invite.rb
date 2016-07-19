@@ -28,6 +28,7 @@ module SlackbotFrd
             }
           ).body
         )
+        ValidateSlack.response(@response)
         @response
       end
     end

@@ -27,6 +27,7 @@ module SlackbotFrd
         }
 
         @response = self.class.post('', :body => body)
+        ValidateSlack.response(@response)
         @response.body
       end
     end
