@@ -139,7 +139,16 @@ module SlackbotFrd
       )
     end
 
-    def send_message(channel:, message:, username: nil, avatar_emoji: nil, avatar_url: nil, channel_is_id: false, parse: 'full')
+    def send_message(
+      channel:,
+      message:,
+      username: nil,
+      avatar_emoji: nil,
+      avatar_url: nil,
+      parse: 'full',
+      thread_ts: nil,
+      reply_broadcast: false
+    )
       if (username && (avatar_emoji || avatar_url)) || parse != 'full'
         send_message_as_bot(
           channel: channel,
@@ -148,10 +157,18 @@ module SlackbotFrd
           avatar_emoji: avatar_emoji,
           avatar_url: avatar_url,
           channel_is_id: channel_is_id,
-          parse: parse
+          parse: parse,
+          thread_ts: thread_ts,
+          reply_broadcast: reply_broadcast
         )
       else
-        send_message_as_user(channel: channel, message: message, channel_is_id: channel_is_id)
+        send_message_as_user(
+          channel: channel,
+          message: message,
+          channel_is_id: channel_is_id,
+          thread_ts: thread_ts,
+          reply_broadcast: reply_broadcast
+        )
       end
     end
 
@@ -297,7 +314,13 @@ module SlackbotFrd
     end
 
     private
-    def send_message_as_user(channel:, message:, channel_is_id: false)
+    def send_message_as_user(
+      channel:,
+      message:,
+      channel_is_id: false,
+      thread_ts: nil,
+      reply_broadcast: false
+    )
       unless @ws
         log_and_add_to_error_file(
           "Cannot send message '#{message}' as user to channel '#{channel}' because not connected to wss stream"
@@ -315,7 +338,9 @@ module SlackbotFrd
           id: event_id,
           type: 'message',
           channel: channel_id,
-          text: message
+          text: message,
+          thread_ts: thread_ts,
+          reply_broadcast: reply_broadcast
         }.to_json)
 
         SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
@@ -325,7 +350,17 @@ module SlackbotFrd
     end
 
     private
-    def send_message_as_bot(channel:, message:, username:, avatar_emoji: nil, avatar_url: nil, channel_is_id: false, parse: 'full')
+    def send_message_as_bot(
+      channel:,
+      message:,
+      username: nil,
+      avatar_emoji: nil,
+      avatar_url: nil,
+      parse: 'full',
+      thread_ts: nil,
+      reply_broadcast: false,
+      channel_is_id: false
+    )
       SlackbotFrd::Log.debug(
         "#{self.class}: Sending message '#{message}' as bot user '#{username}' to channel '#{channel}'"
       )
@@ -339,7 +374,9 @@ module SlackbotFrd
         username: username,
         avatar_emoji: avatar_emoji,
         avatar_url: avatar_url,
-        parse: parse
+        parse: parse,
+        thread_ts: thread_ts,
+        reply_broadcast: reply_broadcast
       )
 
       SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
