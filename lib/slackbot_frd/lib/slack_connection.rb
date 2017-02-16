@@ -145,6 +145,7 @@ module SlackbotFrd
       username: nil,
       avatar_emoji: nil,
       avatar_url: nil,
+      channel_is_id: false,
       parse: 'full',
       thread_ts: nil,
       reply_broadcast: false
