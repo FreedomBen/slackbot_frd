@@ -31,7 +31,7 @@ Here are events that you may wish to listen for (put inside your `add_callbacks(
             # Pass a block that handles your response
             slack_connection.on_connected do
             slack_connection.on_close do
-            slack_connection.on_message do |user:, channel:, timestamp:|
+            slack_connection.on_message do |user:, channel:, timestamp:, thread_ts:|
             slack_connection.on_channel_joined() do |user:, channel:|
             slack_connection.on_channel_left do |user:, channel:|
 
@@ -43,11 +43,11 @@ Here are events that you may wish to listen for (put inside your `add_callbacks(
 Here are responses through the slack connection you may wish to use:
 
     def add_callbacks(slack_connection)
-        slack_connection.on_message do |user:, channel:, timestamp:|
+        slack_connection.on_message do |user:, channel:, timestamp:, thread_ts:|
 
-            slack_connection.send_message(message:, channel:)
-            slack_connection.send_message(message:, channel:, username:, avatar_emoji:)
-            slack_connection.send_message(message:, channel:, username:, avatar_url:)
+            slack_connection.send_message(message:, channel:, thread_ts: nil)
+            slack_connection.send_message(message:, channel:, username:, avatar_emoji:, thread_ts: nil)
+            slack_connection.send_message(message:, channel:, username:, avatar_url:, thread_ts: nil)
 
             slack_connection.delete_message(channel:, timestamp:)
             slack_connection.post_reaction(name:, channel:, timestamp:)
@@ -55,6 +55,12 @@ Here are responses through the slack connection you may wish to use:
 
         end
     end
+
+The `thread_ts` parameter is how you send your message as a reply in a thread versus
+in the regular channel, and how you can tell if the message received is part of a thread.
+The `thread_ts` value passed into your `on_message` listener will be populated if the
+message was part of a thread.  To reply as part of the thread, `thread_ts` should be
+the timestamp of the root of the thread.
 
 ### Data retrieval
 
