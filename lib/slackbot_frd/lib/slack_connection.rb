@@ -447,6 +447,13 @@ module SlackbotFrd
     end
 
     private
+    def extract_thread_ts(message)
+      thread_ts = message['thread_ts']
+      thread_ts = message['message']['thread_ts'] if message['message'] && message['message']['thread_ts']
+      thread_ts
+    end
+
+    private
     def extract_text(message)
       text = message['text']
       text = message['message']['text'] if !text && message['message']
@@ -461,6 +468,7 @@ module SlackbotFrd
       channel = message['channel']
       text = extract_text(message)
       ts = extract_ts(message)
+      thread_ts = extract_thread_ts(message)
 
       unless user
         SlackbotFrd::Log.warn("#{self.class}: Chat message doesn't include user! message: #{message}")
@@ -484,7 +492,8 @@ module SlackbotFrd
           user: user_id_to_name(user),
           channel: channel_id_to_name(channel),
           message: text,
-          timestamp: ts
+          timestamp: ts,
+          thread_ts: thread_ts
         )
       end
     end
