@@ -50,8 +50,8 @@ module SlackbotFrd
         @avatar_emoji = avatar_emoji
         @avatar_url = avatar_url
         @parse = parse
-        @thread_ts: thread_ts
-        @reply_broadcast: reply_broadcast
+        @thread_ts = thread_ts
+        @reply_broadcast = reply_broadcast
       end
 
       def postMessage
