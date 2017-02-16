@@ -1,5 +1,7 @@
 # Slackbot FRD (Slackbot For Realz Dude)
 
+[![Gem Version](https://badge.fury.io/rb/slackbot_frd.svg)](https://badge.fury.io/rb/slackbot_frd) [![Code Climate](https://codeclimate.com/github/FreedomBen/slackbot_frd/badges/gpa.svg)](https://codeclimate.com/github/FreedomBen/slackbot_frd) [![Dependency Status](https://gemnasium.com/badges/github.com/FreedomBen/slackbot_frd.svg)](https://gemnasium.com/github.com/FreedomBen/slackbot_frd) [![Dependency Status](https://dependencyci.com/github/FreedomBen/slackbot_frd/badge)](https://dependencyci.com/github/FreedomBen/slakcbot_frd)
+
 tl;dr:  This is a ruby framework that makes it easy to write bots that talk on [Slack](https://slack.com/).  It puts rails to shame.  Requires Ruby 2.1 or newer.
 
 The slack web api is good, but very raw.  What you need is a great ruby framework to abstract away all that.  This is it!  This framework allows you to write bots easily by providing methods that are easy to call.  Behind the scenes, the framework is negotiating your real time stream, converting channel names and user names to and from IDs so you can use the names instead, and parsing/classifying the real time messages into useful types that you can hook into.  Don't write your bot without this.
