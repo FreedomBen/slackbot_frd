@@ -480,6 +480,14 @@ module SlackbotFrd
         return
       end
 
+      if ts == thread_ts
+        SlackbotFrd::Log.warn(
+          "#{self.class}: Omitting chat message from processing because the timestamp and thread_ts are " \
+          'the same (which indicates that this is a replay message)'
+        )
+        return
+      end
+
       @on_message_callbacks.where_include_all(user: user, channel: channel).each do |callback|
         # instance_exec allows the user to call send_message and send_message_as_user
         # without prefixing like this: slack_connection.send_message()
