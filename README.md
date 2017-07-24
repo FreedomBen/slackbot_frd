@@ -331,7 +331,7 @@ You can post a chat message that appears to come from a "bot," using only your u
 
 Sample project number one is [simple_rafflebot](https://github.com/FreedomBen/simple_rafflebot), a trivial "Raffle Bot" that responds to any message that starts with "rafflebot" by getting a list of users in the channel and randomly picking a "winner" from the list.  You can find it here:  https://github.com/FreedomBen/simple_rafflebot
 
-Sample project number two is [rafflebot](https://github.com/FreedomBen/rafflebot), which expands on simple_rafflebothe by adding some nice features.  This project includes a sqlite database to persist data.
+Sample project number two is [rafflebot](https://github.com/FreedomBen/rafflebot), which expands on simple_rafflebot by adding some nice features.  This project includes a sqlite database to persist data.
 
 ## How do I set up incoming/outgoing webhooks with this?
 
