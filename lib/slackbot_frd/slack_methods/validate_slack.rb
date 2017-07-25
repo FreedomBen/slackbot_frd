@@ -13,7 +13,7 @@ module SlackbotFrd
                 else
                   'Slack returned an error'
                 end
-          raise AuthenticationFailedError.new("#{msg} - response: #{response}")
+          raise StandardError.new("#{msg} - response: #{response}")
         end
       end
     end
