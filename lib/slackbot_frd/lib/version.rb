@@ -1,4 +1,4 @@
 module SlackbotFrd
-  VERSION = '0.3.3'
-  DATE    = '2017-02-15'
+  VERSION = '0.3.4'
+  DATE    = '2017-07-25'
 end
