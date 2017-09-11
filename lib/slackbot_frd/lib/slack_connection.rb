@@ -130,7 +130,7 @@ module SlackbotFrd
 
     def send_im(user:, message:, username: nil, avatar_emoji: nil, avatar_url: nil)
       send_message(
-        channel: im_channel_for_user(user),
+        channel: im_channel_for_user(user: user),
         message: message,
         username: username,
         avatar_emoji: avatar_emoji,
