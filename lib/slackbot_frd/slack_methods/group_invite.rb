@@ -3,20 +3,21 @@ require 'json'
 
 module SlackbotFrd
   module SlackMethods
-    class ChannelsInvite
+    class GroupsInvite
       include HTTParty
-      base_uri 'https://slack.com/api/channels.invite'
+      base_uri 'https://slack.com/api/groups.invite'
 
       attr_reader :response
 
       def self.invite(token:, user:, channel:)
         SlackbotFrd::Log.info(user.to_s)
-        ChannelsInvite.new(token: token, user: user, channel: channel).run
+        GroupsInvite.new(token: token, user: user, channel: channel).run
       end
 
       def initialize(token:, user:, channel:)
         @token = token
         @user = user
+
         @channel = channel
       end
 
