@@ -10,7 +10,6 @@ module SlackbotFrd
       attr_reader :response
 
       def self.invite(token:, user:, channel:)
-        SlackbotFrd::Log.info(user.to_s)
         ChannelsInvite.new(token: token, user: user, channel: channel).run
       end
 
