@@ -214,6 +214,20 @@ module SlackbotFrd
       SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
     end
 
+    def invite_user_to_group(user:, channel:)
+      SlackbotFrd::Log.debug(
+        "#{self.class}: Inviting user '#{user}' to channel '#{channel}'"
+      )
+
+      resp = SlackbotFrd::SlackMethods::GroupsInvite.invite(
+        token: @token,
+        user: user_name_to_id(user),
+        channel: channel_name_to_id(channel)
+      )
+
+      SlackbotFrd::Log.debug("#{self.class}: Received response:  #{resp}")
+    end
+
     def im_channel_for_user(user:)
       SlackbotFrd::Log.debug(
         "#{self.class}: Opening or retrieving IM channel for user '#{user}'"

@@ -1,0 +1,38 @@
+require 'httparty'
+require 'json'
+
+module SlackbotFrd
+  module SlackMethods
+    class GroupsInvite
+      include HTTParty
+      base_uri 'https://slack.com/api/groups.invite'
+
+      attr_reader :response
+
+      def self.invite(token:, user:, channel:)
+        SlackbotFrd::Log.info(user.to_s)
+        GroupsInvite.new(token: token, user: user, channel: channel).run
+      end
+
+      def initialize(token:, user:, channel:)
+        @token = token
+        @user = user
+
+        @channel = channel
+      end
+
+      def run
+        @response = JSON.parse(
+          self.class.post(
+            '',
+            body: {
+              token: @token, channel: @channel, user: @user
+            }
+          ).body
+        )
+        ValidateSlack.response(@response)
+        @response
+      end
+    end
+  end
+end
