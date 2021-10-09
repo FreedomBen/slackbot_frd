@@ -28,10 +28,10 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'activesupport', '~> 4.2'
   s.add_runtime_dependency 'httparty', '0.13.3'
-  s.add_runtime_dependency 'faye-websocket', '~> 0.9'
+  s.add_runtime_dependency 'faye-websocket', '~> 0.11'
   s.add_runtime_dependency 'colorize', '~> 0.7'
   s.add_runtime_dependency 'thor', '~> 0.19'
-  s.add_runtime_dependency 'json', '~> 1.8'
+  s.add_runtime_dependency 'json', '~> 2.3'
   s.add_runtime_dependency 'file-append', '~> 0.0'
   s.add_runtime_dependency 'ptools', '~> 1.3'
 
