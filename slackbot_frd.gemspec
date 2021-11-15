@@ -26,15 +26,15 @@ Gem::Specification.new do |s|
 
   s.executables << 'slackbot-frd'
 
-  s.add_runtime_dependency 'activesupport', '~> 4.2'
-  s.add_runtime_dependency 'httparty', '0.13.3'
+  s.add_runtime_dependency 'activesupport', '~> 6.1'
+  s.add_runtime_dependency 'httparty', '~> 0.20'
   s.add_runtime_dependency 'faye-websocket', '~> 0.11'
-  s.add_runtime_dependency 'colorize', '~> 0.7'
-  s.add_runtime_dependency 'thor', '~> 0.19'
-  s.add_runtime_dependency 'json', '~> 2.3'
+  s.add_runtime_dependency 'colorize', '~> 0.8'
+  s.add_runtime_dependency 'thor', '~> 1.1'
+  s.add_runtime_dependency 'json', '~> 2.6'
   s.add_runtime_dependency 'file-append', '~> 0.0'
-  s.add_runtime_dependency 'ptools', '~> 1.3'
+  s.add_runtime_dependency 'ptools', '~> 1.4'
 
-  s.add_development_dependency 'byebug', '~> 4.0'
-  s.add_development_dependency 'rspec', '~> 3.1'
+  s.add_development_dependency 'byebug', '~> 11.1'
+  s.add_development_dependency 'rspec', '~> 3.10'
 end
